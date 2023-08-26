@@ -1,0 +1,100 @@
+<html>
+    <head>
+        <script type="text/javascript" src="../eel.js"></script>
+        <script type="text/javascript" src="./script.js"></script>
+        
+    </head>
+    <style>
+        .textbox {
+            color: blue;
+            text-align: left;
+            padding: 2px;
+            color: #f0f0f0;
+            background-color: #2b2b2b;
+            border: 2px solid #f0f0f0; 
+            border-radius: 5px;
+        }
+        .textbox2 {
+            color: #f0f0f0; /* Changed from blue to red */
+            text-align: left;
+            padding: 2px;
+            background-color: #2b2b2b;
+            border: 1px solid #89CFF0; /* Blueish hue */
+            border-radius: 5px;
+            margin: 1px;
+            max-width: 60%;
+        }
+        .textbox3 {
+            color: #f0f0f0; /* Changed from blue to red */
+            text-align: left;
+            padding: 2px;
+            background-color: #2b2b2b;
+            border: 1px solid #FF6347; /* Contrasting accent color */
+            border-radius: 5px;
+            margin: 1px;
+            max-width: 60%;
+        }
+
+        /* Custom scrollbar styles */
+        #messagebox::-webkit-scrollbar {
+            width: 10px;
+        }
+        #messagebox::-webkit-scrollbar-track {
+            background: #2b2b2b;
+        }
+        #messagebox::-webkit-scrollbar-thumb {
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        #messagebox::-webkit-scrollbar-thumb:hover {
+            background: #89CFF0;
+        }
+    </style>
+    <body style="display: flex; 
+                align-items: flex-start; 
+                justify-content: center; 
+                flex-direction: row;
+                padding: 10%;
+                background-color: #1a1a1a;
+                font-family: sans-serif;
+                color: #f0f0f0";>
+                
+        <div id="chatbox" style="display: flex; 
+                                flex-direction: column;
+                                background-color: #2b2b2b;
+                                padding: 10px;
+                                align-items: stretch;
+                                justify-content: flex-end;
+                                width: 70vw;
+                                height: 80vh;"
+                                >
+            <div id="messagebox" class="textbox" style="display: flex; 
+                                                flex-direction: column;
+                                                background-color: #2b2b2b;
+                                                padding: 10px;
+                                                max-height: 70%;
+                                                overflow-y: scroll">
+            </div>
+            <input id="rolebox" type="text" class="textbox" style="height: 2em; 
+                                                                margin-top: 20px;">
+            </input>
+            <textarea id="inputbox" rows="5" class="textbox" style="margin-top: 10px; resize: none;"></textarea>
+            
+            
+        </div>
+        <div id="summarybox" style="margin-top: 10%; 
+                                display: flex; 
+                                flex-direction: column;
+                                background-color: #2b2b2b;
+                                padding: 10px;
+                                width: 20vw;
+                                margin: 14px;">
+            <b>Recent</b>
+            <div id="recent" class="textbox" style="margin-top: 20px">
+            </div>
+            <b>Ancient</b>
+            <div id="ancient" class="textbox" style="margin-top: 20px">
+            </div>
+        </div>
+    </body>
+</html>

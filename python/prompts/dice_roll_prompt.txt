@@ -1,0 +1,6 @@
+In order to perform dice rolls, use the ROLL command by writing ROLL(XdY). 
+Here X is the number of dice and Y the type of dice. Here are some example usages:
+ROLL(1d6) 
+ROLL(4d5)
+ROLL(2d20)
+After having cast such a command, please wait for the System to reply with the results.
