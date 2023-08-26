@@ -16,10 +16,6 @@ elf_race_traits = [
         "description": "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep."
     },
     {
-        "name": "Languages",
-        "description": "You can speak, read, and write Common and Elvish. Elvish is fluid, with subtle intonations and intricate grammar. Elven literature is rich and varied, and their songs and poems are famous among other races. Many bards learn their language so they can add Elvish ballads to their repertoires."
-    },
-    {
         "name": "Elf Weapon Training",
         "description": "You have proficiency with the longsword, shortsword, shortbow, and longbow."
     },
@@ -47,10 +43,6 @@ halfling_race_traits = [
       "description": "You can move through the space of any creature that is of a size larger than yours."
    },
    {
-      "name": "Languages",
-      "description": "You can speak, read, and write Common and Halfling. The Halfling language isn't secret, but halflings are loath to share it with others. They write very little, so they don't have a rich body of literature. Their oral tradition, however, is very strong. Almost all halflings speak Common to converse with the people in whose lands they dwell or through which they are traveling."
-   },
-   {
       "name": "Lightfoot: Naturally Stealthy",
       "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."
    }
@@ -73,10 +65,6 @@ halforc_race_traits =  [
       "name": "Savage Attacks",
       "description": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."
    },
-   {
-      "name": "Languages",
-      "description": "You can speak, read, and write Common and Orc. Orc is a harsh, grating language with hard consonants. It has no script of its own but is written in the Dwarvish script."
-   }
 ]
 
 halfelf_race_traits = [
@@ -92,10 +80,6 @@ halfelf_race_traits = [
       "name": "Skill Versatility",
       "description": "You gain proficiency in two skills of your choice."
    },
-   {
-      "name": "Languages",
-      "description": "You can speak, read, and write Common, Elvish, and one extra language of your choice."
-   }
 ]
 
 gnome_race_traits =  [
@@ -106,10 +90,6 @@ gnome_race_traits =  [
     {
         "name": "Gnome Cunning",
         "description": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."
-    },
-    {
-        "name": "Languages",
-        "description": "You can speak, read, and write Common and Gnomish. The Gnomish language, which uses the Dwarvish script, is renowned for its technical treatises and its catalogs of knowledge about the natural world."
     },
     {
         "name": "Artificer's Lore",
@@ -141,10 +121,6 @@ dwarf_race_traits = [
     {
         "name": "Stonecunning",
         "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus."
-    },
-    {
-        "name": "Languages",
-        "description": "You can speak, read, and write Common and Dwarvish. Dwarvish is full of hard consonants and guttural sounds, and those characteristics spill over into whatever other language a dwarf might speak."
     },
 ]
 
@@ -182,9 +158,4 @@ tiefling_race_traits = [
   }
 ]
 
-human_race_traits = [
-   {
-      "name": "Languages",
-      "description": "You can speak, read, and write Common and one extra language of your choice. Humans typically learn the languages of other peoples they deal with, including obscure dialects. They are fond of sprinkling their speech with words borrowed from other tongues: Orc curses, Elvish musical expressions, Dwarvish military phrases, and so on."
-   }
-]
+human_race_traits = []

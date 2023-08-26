@@ -211,15 +211,14 @@ class CharacterSheet:
 
     def set_proficiency_bonus(self, new_bonus):
         if self.logging and self.proficiency_bonus != new_bonus:
-            self.log.append(f'Spell save DC: {self.proficiency_bonus} -> {new_bonus}')
+            self.log.append(f'Proficiency Bonus: {self.proficiency_bonus} -> {new_bonus}')
 
         delta = new_bonus - self.proficiency_bonus
         self.proficiency_bonus += delta
         self.set_spell_attack_bonus(self.spell_attack_bonus + delta)
         self.set_spell_save_DC(self.spell_save_DC + delta)
-        for skill_name in self.skills.keys():
-            if skill_name in self.skill_proficiencies:
-                self.set_skill_bonus(skill_name, self.skills[skill_name] + delta)
+        for skill_name in self.skill_proficiencies:
+            self.set_skill_bonus(skill_name, self.skills[skill_name] + delta)
 
     def set_skill_bonus(self, skill_name, new_bonus):
         if self.logging and self.skills[skill_name] != new_bonus:
@@ -256,11 +255,13 @@ class CharacterSheet:
     def set_max_HP(self, new_max_HP):
         if self.logging and self.max_HP != new_max_HP:
             self.log.append(f'max HP: {self.max_HP} -> {new_max_HP}')
+        self.max_HP = new_max_HP
 
     def set_HP(self, new_HP):
         if self.logging and self.HP != new_HP:
             self.log.append(f'HP: {self.HP} -> {new_HP}')
-            
+        self.HP = new_HP
+        
     def set_ability_score(self, name, value):
         if self.logging and self.ability_scores[name] != value:
             self.log.append(f'{name}: {self.ability_scores[name]} -> {value}')
@@ -466,26 +467,28 @@ class CharacterSheet:
             self.prepare_level_up()
             
     def prepare_level_up(self):
-        if self.logging:
-            self.log.append('Level up is ready')
-        self.level_up_ready = True
-        self.level_up_message = 'You can level up!'
-        special_levels = self.compute_special_levels()
-        if self.level+1 in special_levels:
-            self.level_up_message += 'You can either increase two ability scores by 1 or choose a feat.'
+        if self.level < 20:
+            if self.logging:
+                self.log.append('Level up is ready')
+            self.level_up_ready = True
+            self.level_up_message = 'You can level up!'
+            special_levels = self.compute_special_levels()
+            if self.level+1 in special_levels:
+                self.level_up_message += 'You can either increase two ability scores by 1 or choose a feat.'
 
     def level_up(self):
-        if self.logging:
-            self.log.append(f'Level: {self.level} -> {self.level+1}')
-        self.level += 1
-        self.set_max_HP(int(self.hit_dice[1:])//2 + self.CONmod + (1 if self.race == 'Dwarf' else 0))
-        self.max_spell_slots = self.set_max_spell_slots(self.compute_max_spell_slots())
-        self.max_sorcery_points = self.set_max_sorcery_points(self.compute_max_sorcery_points())
-        self.rage_damage = self.set_rage_damage(self.compute_rage_damage())
-        self.max_rages = self.set_max_rages(self.compute_max_rages())
-        for feature in self.class_features:
-            if feature['level'] <= self.level:
-                self.add_feature(feature['name', feature['description']])
+        if self.level < 20:
+            if self.logging:
+                self.log.append(f'Level: {self.level} -> {self.level+1}')
+            self.level += 1
+            self.set_max_HP(self.max_HP + int(self.hit_dice[1:])//2 + self.ability_modifiers['CON'] + (1 if self.race == 'Dwarf' else 0))
+            self.set_max_spell_slots(self.compute_max_spell_slots())
+            self.set_max_sorcery_points(self.compute_max_sorcery_points())
+            self.set_rage_damage(self.compute_rage_damage())
+            self.set_max_rages(self.compute_max_rages())
+            for feature in self.class_features:
+                if feature['level'] == self.level:
+                    self.add_feature(feature['name'], feature['description'])
 
 
     def level_up_with_ability_score_improvement(self, first_ability_name, second_ability_name):
@@ -517,8 +520,9 @@ class CharacterSheet:
     def rest(self):
         self.set_HP(self.max_HP)
         self.set_spell_slots(self.max_spell_slots)
-        self.rages = self.max_rages
-        self.sorcery_points = self.max_sorcery_points
+        self.set_rages(self.max_rages)
+        self.set_sorcery_points(self.max_sorcery_points)
+        self.set_wild_shape_num(self.max_wild_shape_num)
     
     def add_equipment(self, name, description):
         self.equipment.append({'name': name, 'description': description})
@@ -566,21 +570,21 @@ class CharacterSheet:
 
         text += f'Saving throws: {", ".join(self.saving_throw_proficiencies)} \n'
         text += f'Proficency bonus: {self.proficiency_bonus} \n'
-        text += f'Skills: \n{nl.join([t + name + ": " + str(self.skills[name]) + ("(proficient)" if name in self.skill_proficiencies else "") for name in self.skills.keys()])} \n'
+        text += f'Skills: \n{nl.join([t + name + ": " + str(self.skills[name]) + (" (proficient)" if name in self.skill_proficiencies else "") for name in self.skills.keys()])} \n'
         
         text += f'Equipment: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.equipment])} \n'
         text += f'Inventory: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.inventory])} \n'
 
-        text += f'Race traits: \n {"; ".join([item["name"] for item in self.race_traits])} \n'
-        text += f'Features: \n {"; ".join([item["name"] for item in self.features])} \n'
-        text += f'Conditions: \n {nl.join([t + condition["name"] + ": " + condition["description"] + "Remaining duration: " + self.duration_to_string(condition["duration"]) for condition in self.conditions])} \n'
+        text += f'Race traits: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.race_traits])} \n'
+        text += f'Features: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.features])} \n'
+        text += f'Conditions: \n {nl.join([t + condition["name"] + ": " + condition["description"] + " (Duration: " + self.duration_to_string(condition["duration"]) + ")" for condition in self.conditions])} \n'
 
-        text += '\n Spellcasting. \n'
+        text += 'Spellcasting. \n'
         text += f'Spellcasting ability: {self.spellcasting_ability}{t}'
         text += f'Spellcasting ability modifier: {self.spellcasting_ability_mod}{t}'
         text += f'Spell attack bonus: {self.spell_attack_bonus}{t}'
         text += f'Spell save DC: {self.spell_save_DC} \n'
-        text += f'Spell slots: {", ".join(["Level " + str(i) + ": " + str(self.spell_slots[i]) + "/" + str(val) for (i, val) in enumerate(self.max_spell_slots)])} \n'
+        text += f'Spell slots: {", ".join(["Level " + str(i+1) + ": " + str(self.spell_slots[i]) + "/" + str(val) for (i, val) in enumerate(self.max_spell_slots)])} \n'
         text += f'{"Spells" if self.character_class != "wizard" else "Spellbook"}: {", ".join([spell for spell in self.spells])} \n'
 
         if self.character_class == 'Sorcerer':
@@ -818,7 +822,9 @@ class CharacterSheet:
             225000,  # Level 17
             265000,  # Level 18
             305000,  # Level 19
-            355000  # Level 20
+            355000,  # Level 20
+            99999999,
+            99999999
         ]
     
 
@@ -849,6 +855,6 @@ class CharacterSheet:
         return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}m {duration["seconds"]}s'
 
 
-char = CharacterSheet("Adric", "Dwarf", "Cleric", ["Investigation", "Intimidation"], 10, 11, 12, 13, 14, 15)
+char = CharacterSheet("Adric", "Dwarf", "Druid", ["investigation", "intimidation"], 10, 11, 12, 13, 14, 15)
 
 print(char.print())
