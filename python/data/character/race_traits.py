@@ -56,7 +56,7 @@ halfling_race_traits = [
    }
 ]
 
-half_orc_race_traits =  [
+halforc_race_traits =  [
    {
       "name": "Darkvision",
       "description": "Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
@@ -79,7 +79,7 @@ half_orc_race_traits =  [
    }
 ]
 
-half_elf_race_traits = [
+halfelf_race_traits = [
    {
       "name": "Darkvision",
       "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
