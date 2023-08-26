@@ -39,7 +39,7 @@ all_classes = [
 class CharacterSheet:
     
     def __init__(self, name, race, character_class, skill_proficiencies, #choose 2, options depending on class
-                    STR=0, DEX=0, CON=0, INT=0, WIS=0, CHA=0
+                    STR, DEX, CON, INT, WIS, CHA
                     ):
         
         self.log = []
@@ -51,34 +51,35 @@ class CharacterSheet:
         self.level = 1
         self.level_speed = 5
         self.level_up_ready = True
-        self.level_message = ''
+        self.level_up_message = ''
 
         self.XP = 0
+        self.XP_table = self.compute_XP_table()
         self.AC = 10
 
         self.ability_scores = {
-            'STR', 0,
-            'DEX', 0,
-            'CON', 0,
-            'INT', 0,
-            'WIS', 0,
-            'CHA', 0
+            'STR': 0,
+            'DEX': 0,
+            'CON': 0,
+            'INT': 0,
+            'WIS': 0,
+            'CHA': 0
         }
         self.ability_modifiers = {
-            'STR', 0,
-            'DEX', 0,
-            'CON', 0,
-            'INT', 0,
-            'WIS', 0,
-            'CHA', 0
+            'STR': 0,
+            'DEX': 0,
+            'CON': 0,
+            'INT': 0,
+            'WIS': 0,
+            'CHA': 0
         }
         self.ability_scores_race_bonus = {
-            'STR', 0,
-            'DEX', 0,
-            'CON', 0,
-            'INT', 0,
-            'WIS', 0,
-            'CHA', 0
+            'STR': 0,
+            'DEX': 0,
+            'CON': 0,
+            'INT': 0,
+            'WIS': 0,
+            'CHA': 0
         }
         if race == 'Elf':
             self.ability_scores_race_bonus['DEX'] = 2
@@ -115,7 +116,7 @@ class CharacterSheet:
         
         self.skills = {
             'acrobatics': 0,
-            'animal_handling': 0,
+            'animal handling': 0,
             'arcana': 0,
             'athletics': 0,
             'deception': 0,
@@ -129,7 +130,7 @@ class CharacterSheet:
             'performance': 0,
             'persuasion': 0,
             'religion': 0,
-            'sleight_of_hand': 0,
+            'sleight of hand': 0,
             'stealth': 0,
             'survival': 0
         }
@@ -149,8 +150,11 @@ class CharacterSheet:
         self.set_ability_score('WIS', WIS + self.ability_scores_race_bonus['WIS'])
         self.set_ability_score('CHA', CHA + self.ability_scores_race_bonus['CHA'])
         
+        self.proficiency_bonus = 0
+        self.skill_proficiencies = []
         self.set_proficiency_bonus(self.compute_proficiency_bonus())
         self.set_skill_proficiencies(skill_proficiencies)
+
 
         self.hit_dice = self.compute_hit_dice()
 
@@ -169,13 +173,14 @@ class CharacterSheet:
         self.spell_book = []
 
         self.race_traits = self.compute_race_traits()
-        self.features = self.compute_class_features()
+        self.class_features = self.compute_class_features()
+        self.features = [feature for feature in self.class_features if feature['level'] == 1]
 
         self.inventory = []
         self.equipment = []
         self.conditions = []
-
-        self.saving_throw_proficiency = self.compute_saving_throw_proficiency()
+        self.spells = []
+        self.saving_throw_proficiencies = self.compute_saving_throw_proficiencies()
     
         self.max_rages = self.compute_max_rages()
         self.rages = self.max_rages
@@ -186,7 +191,7 @@ class CharacterSheet:
 
         self.logging = True
 
-    def reset_log(self):
+    def clear_log(self):
         self.log = []
 
     def print_log(self):
@@ -228,7 +233,8 @@ class CharacterSheet:
             self.log.append(f'Skill proficiencies: {", ".join(self.skill_proficiencies)} -> {", ".join(new_skill_proficiencies)}')
         old_logging = self.logging
         self.logging = False
-        old_bonus = self.set_proficiency_bonus(0)
+        old_bonus = self.proficiency_bonus
+        self.set_proficiency_bonus(0)
         self.skill_proficiencies = new_skill_proficiencies
         if old_logging:
             self.logging = True
@@ -238,6 +244,7 @@ class CharacterSheet:
         if self.logging and self.spellcasting_ability_mod != new:
             self.log.append(f'Spellcasting ability modifier: {self.spellcasting_ability_mod} -> {new}')
         delta = new - self.spellcasting_ability_mod
+        self.spellcasting_ability_mod += delta
         self.set_spell_attack_bonus(self.spell_attack_bonus + delta)
         self.set_spell_save_DC(self.spell_save_DC + delta)
     
@@ -255,43 +262,49 @@ class CharacterSheet:
             self.log.append(f'HP: {self.HP} -> {new_HP}')
             
     def set_ability_score(self, name, value):
-        if self.logging and self.abilits_scores[name] != value:
+        if self.logging and self.ability_scores[name] != value:
             self.log.append(f'{name}: {self.ability_scores[name]} -> {value}')
 
-        delta = value - self.ability_scores[name]
-        self.ability_scores[name] += delta
+        delta_score = value - self.ability_scores[name]
+        self.ability_scores[name] += delta_score
+        old_mod = self.ability_modifiers[name]
         self.ability_modifiers[name] = self.compute_modifier(self.ability_scores[name])
 
-        if name == self.compute_spellcasting_ability():
-            self.set_spellcasting_ability_mod(self.spellcasting_ability_mod + delta)
+        if self.logging and self.ability_modifiers[name] != old_mod:
+            self.log.append(f'{name}mod: {old_mod} -> {self.ability_modifiers[name]}')
+        
+        delta_mod = self.ability_modifiers[name] - old_mod
+
+        if name == self.spellcasting_ability:
+            self.set_spellcasting_ability_mod(self.spellcasting_ability_mod + delta_mod)
 
         if name == 'STR':
-            self.set_skill_bonus('athletics', self.skills['athletics'] + delta)
+            self.set_skill_bonus('athletics', self.skills['athletics'] + delta_mod)
         elif name == 'DEX':
-            self.set_skill_bonus('acrobatics', self.skills['acrobatics'] + delta)
-            self.set_skill_bonus('sleight_of_hand', self.skills['sleight_of_hand'] + delta)
-            self.set_skill_bonus('stealth', self.skills['stealth'] + delta)
+            self.set_skill_bonus('acrobatics', self.skills['acrobatics'] + delta_mod)
+            self.set_skill_bonus('sleight of hand', self.skills['sleight of hand'] + delta_mod)
+            self.set_skill_bonus('stealth', self.skills['stealth'] + delta_mod)
 
-            self.set_AC(self.AC + delta)
+            self.set_AC(self.AC + delta_mod)
         elif name == 'CON':
             pass
         elif name == 'INT':
-            self.set_skill_bonus('arcana', self.skills['arcana'] + delta)
-            self.set_skill_bonus('history', self.skills['history'] + delta)
-            self.set_skill_bonus('investigation', self.skills['investigation'] + delta)
-            self.set_skill_bonus('nature', self.skills['nature'] + delta)
-            self.set_skill_bonus('religion', self.skills['religion'] + delta)
+            self.set_skill_bonus('arcana', self.skills['arcana'] + delta_mod)
+            self.set_skill_bonus('history', self.skills['history'] + delta_mod)
+            self.set_skill_bonus('investigation', self.skills['investigation'] + delta_mod)
+            self.set_skill_bonus('nature', self.skills['nature'] + delta_mod)
+            self.set_skill_bonus('religion', self.skills['religion'] + delta_mod)
         elif name == 'WIS':
-            self.set_skill_bonus('animal_handling', self.skills['animal_handling'] + delta)
-            self.set_skill_bonus('insight', self.skills['insight'] + delta)
-            self.set_skill_bonus('medicine', self.skills['medicine'] + delta)
-            self.set_skill_bonus('perception', self.skills['perception'] + delta)
-            self.set_skill_bonus('survival', self.skills['survival'] + delta)
+            self.set_skill_bonus('animal handling', self.skills['animal handling'] + delta_mod)
+            self.set_skill_bonus('insight', self.skills['insight'] + delta_mod)
+            self.set_skill_bonus('medicine', self.skills['medicine'] + delta_mod)
+            self.set_skill_bonus('perception', self.skills['perception'] + delta_mod)
+            self.set_skill_bonus('survival', self.skills['survival'] + delta_mod)
         elif name == 'CHA':
-            self.set_skill_bonus('deception', self.skills['deception'] + delta)
-            self.set_skill_bonus('intimidation', self.skills['intimidation'] + delta)
-            self.set_skill_bonus('performance', self.skills['performance'] + delta)
-            self.set_skill_bonus('persuasion', self.skills['persuasion'] + delta)
+            self.set_skill_bonus('deception', self.skills['deception'] + delta_mod)
+            self.set_skill_bonus('intimidation', self.skills['intimidation'] + delta_mod)
+            self.set_skill_bonus('performance', self.skills['performance'] + delta_mod)
+            self.set_skill_bonus('persuasion', self.skills['persuasion'] + delta_mod)
 
     def use_spell_slots(self, level, amount):
         if self.logging and amount > 0:
@@ -367,9 +380,7 @@ class CharacterSheet:
 
         self.rages -= 1
 
-        self.add_condition.append({'name': 'Rage', 
-                                'description': 'Rage is active', 
-                                'duration': {'days': 0, 'hours': 0, 'minutes': 1, 'seconds': 0}})
+        self.add_condition('Rage', 'Rage is active', 0, 0, 0, 0)
    
     def set_max_rages(self, amount):
         if self.logging and self.max_rages != amount:
@@ -449,28 +460,6 @@ class CharacterSheet:
             self.log.append(f'XP: {self.XP} -> {self.XP + amount}')
         self.XP += amount
 
-        self.XP_table = [
-            0,  # Level 1
-            300,  # Level 2
-            900,  # Level 3
-            2700,  # Level 4
-            6500,  # Level 5
-            14000,  # Level 6
-            23000,  # Level 7
-            34000,  # Level 8
-            48000,  # Level 9
-            64000,  # Level 10
-            85000,  # Level 11
-            100000,  # Level 12
-            120000,  # Level 13
-            140000,  # Level 14
-            165000,  # Level 15
-            195000,  # Level 16
-            225000,  # Level 17
-            265000,  # Level 18
-            305000,  # Level 19
-            355000  # Level 20
-        ]
         self.XP_table = [int(xp / self.level_speed) for xp in self.XP_table]        
 
         if self.XP >= self.XP_table[self.level]:
@@ -494,6 +483,10 @@ class CharacterSheet:
         self.max_sorcery_points = self.set_max_sorcery_points(self.compute_max_sorcery_points())
         self.rage_damage = self.set_rage_damage(self.compute_rage_damage())
         self.max_rages = self.set_max_rages(self.compute_max_rages())
+        for feature in self.class_features:
+            if feature['level'] <= self.level:
+                self.add_feature(feature['name', feature['description']])
+
 
     def level_up_with_ability_score_improvement(self, first_ability_name, second_ability_name):
         self.set_ability_score(first_ability_name, self.ability_scores[first_ability_name] + 1)
@@ -548,14 +541,14 @@ class CharacterSheet:
         self.inventory.pop(next(i for (i, item) in enumerate(self.equipment) if item["name"] == name))
  
 
-    def strinigfy(self):
+    def print(self):
         nl = '\n'
-        t = '\t'
+        t = '      '
         text = ''
-        text += f'Name: {self.name} \t'
-        text += f'Race: {self.race} \t'
-        text += f'Class: {self.character_class} \t'
-        text += f'Level: {self.level} \nt'
+        text += f'Name: {self.name}{t}'
+        text += f'Race: {self.race}{t}'
+        text += f'Class: {self.character_class}{t}'
+        text += f'Level: {self.level}{t}'
         text += f'XP: {self.XP}/{self.XP_table[self.level+1]} \n'
 
         text += self.level_up_message + '\n' if self.level_up_ready else ''
@@ -567,24 +560,25 @@ class CharacterSheet:
         text += f'WIS: {self.ability_scores["WIS"]} ({self.ability_modifiers["WIS"]:+}), '
         text += f'CHA: {self.ability_scores["CHA"]} ({self.ability_modifiers["CHA"]:+}) \n'
 
-        text += f'AC: {self.AC} \t'
-        text += f'max HP: {self.max_HP} \t'
-        text += f'current HP: {self.HP} \t'
+        text += f'AC: {self.AC}{t}'
+        text += f'max HP: {self.max_HP}{t}'
+        text += f'current HP: {self.HP}{t}'
 
-        text += f'Saving throws: {", ".join(self.saving_throws)} \n'
+        text += f'Saving throws: {", ".join(self.saving_throw_proficiencies)} \n'
         text += f'Proficency bonus: {self.proficiency_bonus} \n'
-        text += f'Skills: \n {nl.join([t + name + ": " + str(self.skills[name]) + ("(proficient)" if name in self.skill_proficiencies else "") for name in self.skills.keys()])}'
+        text += f'Skills: \n{nl.join([t + name + ": " + str(self.skills[name]) + ("(proficient)" if name in self.skill_proficiencies else "") for name in self.skills.keys()])} \n'
         
         text += f'Equipment: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.equipment])} \n'
         text += f'Inventory: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.inventory])} \n'
-        
-        text += f'Race traits: \n {", ".join([item["name"] for item in self.race_traits])} \n'
-        text += f'Features: \n {", ".join([item["name"] for item in self.features])} \n'
+
+        text += f'Race traits: \n {"; ".join([item["name"] for item in self.race_traits])} \n'
+        text += f'Features: \n {"; ".join([item["name"] for item in self.features])} \n'
+        text += f'Conditions: \n {nl.join([t + condition["name"] + ": " + condition["description"] + "Remaining duration: " + self.duration_to_string(condition["duration"]) for condition in self.conditions])} \n'
 
         text += '\n Spellcasting. \n'
-        text += f'Spellcasting ability: {self.spellcasting_ability} \t'
-        text += f'Spellcasting ability modifier: {self.spellcasting_ability_mod} \t'
-        text += f'Spell attack bonus: {self.spell_attack_bonus} \t'
+        text += f'Spellcasting ability: {self.spellcasting_ability}{t}'
+        text += f'Spellcasting ability modifier: {self.spellcasting_ability_mod}{t}'
+        text += f'Spell attack bonus: {self.spell_attack_bonus}{t}'
         text += f'Spell save DC: {self.spell_save_DC} \n'
         text += f'Spell slots: {", ".join(["Level " + str(i) + ": " + str(self.spell_slots[i]) + "/" + str(val) for (i, val) in enumerate(self.max_spell_slots)])} \n'
         text += f'{"Spells" if self.character_class != "wizard" else "Spellbook"}: {", ".join([spell for spell in self.spells])} \n'
@@ -593,18 +587,19 @@ class CharacterSheet:
             text += f'Sorcery points: {self.sorcery_points}/{self.max_sorcery_points} \n'
 
         if self.character_class == 'Barbarian':
-            text += f'Rages: {self.rages}/{self.max_rages} \t'
+            text += f'Rages: {self.rages}/{self.max_rages}{t}'
             text += f'Rage damage: {self.rage_damage} \n'
 
         if self.character_class == 'Druid':
             text += f'Wild Shapes: {self.wild_shape_num}/2'
 
+        return text
 
     def compute_modifier(self, stat):
         return (stat - 10) // 2
     
-    def compute_proficiency_bonus(self, level):
-        return 2 + (level - 1) // 4
+    def compute_proficiency_bonus(self):
+        return 2 + (self.level - 1) // 4
 
     def compute_hit_dice(self):
         if self.character_class in ['Barbarian']:
@@ -630,7 +625,7 @@ class CharacterSheet:
         else:
             return 'STR'
         
-    def compute_saving_throw_proficiency(self):
+    def compute_saving_throw_proficiencies(self):
         if self.character_class in ['Barbarian']:
             return ['STR', 'CON']
         elif self.character_class in ['Bard']:
@@ -802,6 +797,29 @@ class CharacterSheet:
         else:
             return []
     
+    def compute_XP_table(self):
+        return [
+            0,  # Level 1
+            300,  # Level 2
+            900,  # Level 3
+            2700,  # Level 4
+            6500,  # Level 5
+            14000,  # Level 6
+            23000,  # Level 7
+            34000,  # Level 8
+            48000,  # Level 9
+            64000,  # Level 10
+            85000,  # Level 11
+            100000,  # Level 12
+            120000,  # Level 13
+            140000,  # Level 14
+            165000,  # Level 15
+            195000,  # Level 16
+            225000,  # Level 17
+            265000,  # Level 18
+            305000,  # Level 19
+            355000  # Level 20
+        ]
     
 
     def update_condition_timers(self, days, hours, minutes, seconds):
@@ -825,7 +843,12 @@ class CharacterSheet:
                 time -= - self.condition['duration']['minutes'] * 60
                 condition['duration']['seconds'] = time
             elif time <= 0:
-                self.conditions.pop(i)
+                self.remove_condition(condition['name'])
             
     def duration_to_string(self, duration):
-        return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}s {duration["seconds"]}s'
+        return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}m {duration["seconds"]}s'
+
+
+char = CharacterSheet("Adric", "Dwarf", "Cleric", ["Investigation", "Intimidation"], 10, 11, 12, 13, 14, 15)
+
+print(char.print())

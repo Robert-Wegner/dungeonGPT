@@ -7,7 +7,6 @@ barbarian_class_features = [
     {"name": "Mindless Rage", "level": 6, "description": "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."},
     {"name": "Intimidating Presence", "level": 10, "description": "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."},
     {"name": "Retaliation", "level": 14, "description": "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."},
-    {"name": "Ability Score Improvement", "level": 4, "description": "When you reach 4th level, and again at 8th, 12th, 16th and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."},
     {"name": "Extra Attack", "level": 5, "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."},
     {"name": "Fast Movement", "level": 5, "description": "Starting at 5th level, your speed increases by 10 feet while you aren't wearing heavy armor."},
     {"name": "Feral Instinct", "level": 7, "description": "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."},
@@ -24,7 +23,6 @@ bard_class_features = [
     {"name": "Jack of All Trades", "level": 2, "description": "Starting at 2nd level, you can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus."},
     {"name": "Song of Rest", "level": 2, "description": "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points."},
     {"name": "Expertise", "level": 3, "description": "At 3rd level, choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies."},
-    {"name": "Ability Score Improvement", "level": 4, "description": "When you reach 4th level, and again at 8th, 12th, 16th and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."},
     {"name": "Font of Inspiration", "level": 5, "description": "Beginning when you reach 5th level, you regain all of your expended uses of Bardic Inspiration when you finish a short or long rest."},
     {"name": "Countercharm", "level": 6, "description": "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required)."},
     {"name": "Magical Secrets", "level": 10, "description": "By 10th level, you have plundered magical knowledge from a wide spectrum of disciplines. Choose two spells from any class, including this one. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip."},
@@ -41,11 +39,6 @@ cleric_class_features = [
         'name': 'Channel Divinity: Turn Undead',
         'level': 2,
         'description': 'As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw...'
-    },
-    {
-        'name': 'Ability Score Improvement',
-        'level': 4,
-        'description': 'When you reach 4th level, and again at 8th, 12th, 16th and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1...'
     },
     {
         'name': 'Destroy Undead',
@@ -99,11 +92,6 @@ druid_class_features = [
         'name': 'Wild Shape',
         'level': 2,
         'description': 'Assume the shape of a beast seen before. Can be used twice, recharged after rest. Restrictions based on druid level. While transformed, game statistics are replaced by beast statistics, but alignment, personality, and Intelligence, Wisdom, and Charisma scores remain.'
-    },
-    {
-        'name': 'Ability Score Improvement',
-        'level': 4,
-        'description': 'Increase one ability score by 2, or two ability scores by 1, at 4th, 8th, 12th, 16th and 19th level.'
     },
     {
         'name': 'Circle of the Land - Bonus Cantrip',
@@ -172,11 +160,6 @@ fighter_class_features = [
     "name": "Martial Archetype",
     "level": 3,
     "description": "Choose an archetype at 3rd level that provides features at various levels."
-  },
-  {
-    "name": "Ability Score Improvement",
-    "level": 4,
-    "description": "When you reach 4th level, and again at 6th, 8th, 12th, 14th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can’t increase an ability score above 20 using this feature."
   },
   {
     "name": "Extra Attack",
@@ -250,11 +233,6 @@ paladin_class_features = [
         "name": "Sacred Oath",
         "level": 3,
         "description": "Swear an oath at 3rd level, granting features at 3rd, 7th, 15th, and 20th level. Each oath provides oath spells and the Channel Divinity feature. Oath spells always prepared and don't count against the number of spells prepared each day."
-    },
-    {
-        "name": "Ability Score Improvement",
-        "level": 4,
-        "description": "Increase one ability score by 2 or two ability scores by 1. Can't increase above 20."
     },
     {
         "name": "Extra Attack",
@@ -338,11 +316,6 @@ ranger_class_features = [
     "description": "Use action and expend ranger spell slot to sense presence of certain creature types within a range. Doesn't reveal location or number of creatures."
   },
   {
-    "name": "Ability Score Improvement",
-    "level": 4,
-    "description": "At 4th, 8th, 12th, 16th, and 19th level, increase one ability score by 2 or two ability scores by 1. Maximum ability score is 20."
-  },
-  {
     "name": "Extra Attack",
     "level": 5,
     "description": "When taking Attack action, make two attacks instead of one."
@@ -413,11 +386,6 @@ rogue_class_features = [{
     "name": "Cunning Action",
     "level": 2,
     "description": "Starting at 2nd level, your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."
-    },
-    {
-    "name": "Ability Score Improvement",
-    "level": 4,
-    "description": "When you reach 4th level, and again at 8th, 10th, 12th, 16th and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
     },
     {
     "name": "Uncanny Dodge",
@@ -548,11 +516,6 @@ sorcerer_class_features = [
         "description": "Spend sorcery points equal to a spell's level to target a second creature with the same spell."
     },
     { 
-        "name": "Ability Score Improvement",
-        "level": 4,
-        "description": "Increase one ability score by 2, or two ability scores by 1 at the 4th, 8th, 12th, 16th and 19th levels."
-    },
-    { 
         "name": "Sorcerous Restoration",
         "level": 20,
         "description": "Regain 4 expended sorcery points whenever you finish a short rest."
@@ -594,11 +557,6 @@ wizard_class_features = [
         "name": "Arcane Recovery",
         "level": 1,
         "description": "Regain spent magical energy via spellbook study. Once daily after a short rest, you can recover spell slots totaling half your wizard level (round up), but not including slots of 6th level or higher."
-    },
-    {
-        "name": "Ability Score Improvement",
-        "level": 4,
-        "description": "At 4th plus every four levels, increase an ability score by 2, or two ability scores by 1. The maximum limit for any score is 20."
     },
     {
         "name": "Spell Mastery",
