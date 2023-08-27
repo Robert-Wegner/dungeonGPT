@@ -38,7 +38,7 @@ all_classes = [
 
 class CharacterSheet:
     
-    def __init__(self, name, race, character_class, skill_proficiencies, #choose 2, options depending on class
+    def __init__(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, #choose 2, options depending on class
                     STR, DEX, CON, INT, WIS, CHA
                     ):
         
@@ -115,24 +115,24 @@ class CharacterSheet:
             self.ability_scores_race_bonus['INT'] = 1
         
         self.skills = {
-            'acrobatics': 0,
-            'animal handling': 0,
-            'arcana': 0,
-            'athletics': 0,
-            'deception': 0,
-            'history': 0,
-            'insight': 0,
-            'intimidation': 0,
-            'investigation': 0,
-            'medicine': 0,
-            'nature': 0,
-            'perception': 0,
-            'performance': 0,
-            'persuasion': 0,
-            'religion': 0,
-            'sleight of hand': 0,
-            'stealth': 0,
-            'survival': 0
+            'Acrobatics': 0,
+            'Animal Handling': 0,
+            'Arcana': 0,
+            'Athletics': 0,
+            'Deception': 0,
+            'History': 0,
+            'Insight': 0,
+            'Intimidation': 0,
+            'Investigation': 0,
+            'Medicine': 0,
+            'Nature': 0,
+            'Perception': 0,
+            'Performance': 0,
+            'Persuasion': 0,
+            'Religion': 0,
+            'Sleight of Hand': 0,
+            'Stealth': 0,
+            'Survival': 0
         }
         
         self.proficiency_bonus = 0
@@ -153,7 +153,7 @@ class CharacterSheet:
         self.proficiency_bonus = 0
         self.skill_proficiencies = []
         self.set_proficiency_bonus(self.compute_proficiency_bonus())
-        self.set_skill_proficiencies(skill_proficiencies)
+        self.set_skill_proficiencies([first_skill_proficiency, first_skill_proficiency])
 
 
         self.hit_dice = self.compute_hit_dice()
@@ -239,6 +239,13 @@ class CharacterSheet:
             self.logging = True
         self.set_proficiency_bonus(old_bonus)
 
+    def add_skill_proficiency(self, new_proficiency):
+        if new_proficiency not in self.skill_proficiencies:
+            self.set_skill_proficiencies(self.skill_proficiencies.copy().append(new_proficiency))
+    def remove_skill_proficiency(self, new_proficiency):
+        if new_proficiency in self.skill_proficiencies:
+            self.set_skill_proficiencies(self.skill_proficiencies.copy().remove(new_proficiency))
+
     def set_spellcasting_ability_mod(self, new):
         if self.logging and self.spellcasting_ability_mod != new:
             self.log.append(f'Spellcasting ability modifier: {self.spellcasting_ability_mod} -> {new}')
@@ -280,32 +287,32 @@ class CharacterSheet:
             self.set_spellcasting_ability_mod(self.spellcasting_ability_mod + delta_mod)
 
         if name == 'STR':
-            self.set_skill_bonus('athletics', self.skills['athletics'] + delta_mod)
+            self.set_skill_bonus('Athletics', self.skills['Athletics'] + delta_mod)
         elif name == 'DEX':
-            self.set_skill_bonus('acrobatics', self.skills['acrobatics'] + delta_mod)
-            self.set_skill_bonus('sleight of hand', self.skills['sleight of hand'] + delta_mod)
-            self.set_skill_bonus('stealth', self.skills['stealth'] + delta_mod)
+            self.set_skill_bonus('Acrobatics', self.skills['Acrobatics'] + delta_mod)
+            self.set_skill_bonus('Sleight of Hand', self.skills['Sleight of Hand'] + delta_mod)
+            self.set_skill_bonus('Stealth', self.skills['Stealth'] + delta_mod)
 
             self.set_AC(self.AC + delta_mod)
         elif name == 'CON':
             pass
         elif name == 'INT':
-            self.set_skill_bonus('arcana', self.skills['arcana'] + delta_mod)
-            self.set_skill_bonus('history', self.skills['history'] + delta_mod)
-            self.set_skill_bonus('investigation', self.skills['investigation'] + delta_mod)
-            self.set_skill_bonus('nature', self.skills['nature'] + delta_mod)
-            self.set_skill_bonus('religion', self.skills['religion'] + delta_mod)
+            self.set_skill_bonus('Arcana', self.skills['Arcana'] + delta_mod)
+            self.set_skill_bonus('History', self.skills['History'] + delta_mod)
+            self.set_skill_bonus('Investigation', self.skills['Investigation'] + delta_mod)
+            self.set_skill_bonus('Nature', self.skills['Nature'] + delta_mod)
+            self.set_skill_bonus('Religion', self.skills['Religion'] + delta_mod)
         elif name == 'WIS':
-            self.set_skill_bonus('animal handling', self.skills['animal handling'] + delta_mod)
-            self.set_skill_bonus('insight', self.skills['insight'] + delta_mod)
-            self.set_skill_bonus('medicine', self.skills['medicine'] + delta_mod)
-            self.set_skill_bonus('perception', self.skills['perception'] + delta_mod)
-            self.set_skill_bonus('survival', self.skills['survival'] + delta_mod)
+            self.set_skill_bonus('Animal Handling', self.skills['Animal Handling'] + delta_mod)
+            self.set_skill_bonus('Insight', self.skills['Insight'] + delta_mod)
+            self.set_skill_bonus('Medicine', self.skills['Medicine'] + delta_mod)
+            self.set_skill_bonus('Perception', self.skills['Perception'] + delta_mod)
+            self.set_skill_bonus('Survival', self.skills['Survival'] + delta_mod)
         elif name == 'CHA':
-            self.set_skill_bonus('deception', self.skills['deception'] + delta_mod)
-            self.set_skill_bonus('intimidation', self.skills['intimidation'] + delta_mod)
-            self.set_skill_bonus('performance', self.skills['performance'] + delta_mod)
-            self.set_skill_bonus('persuasion', self.skills['persuasion'] + delta_mod)
+            self.set_skill_bonus('Deception', self.skills['Deception'] + delta_mod)
+            self.set_skill_bonus('Intimidation', self.skills['Intimidation'] + delta_mod)
+            self.set_skill_bonus('Performance', self.skills['Performance'] + delta_mod)
+            self.set_skill_bonus('Persuasion', self.skills['Persuasion'] + delta_mod)
 
     def use_spell_slots(self, level, amount):
         if self.logging and amount > 0:
@@ -855,6 +862,6 @@ class CharacterSheet:
         return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}m {duration["seconds"]}s'
 
 
-char = CharacterSheet("Adric", "Dwarf", "Druid", ["investigation", "intimidation"], 10, 11, 12, 13, 14, 15)
+#char = CharacterSheet("Adric", "Dwarf", "Druid", ["investigation", "intimidation"], 10, 11, 12, 13, 14, 15)
 
-print(char.print())
+#print(char.print())

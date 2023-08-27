@@ -102,7 +102,7 @@ class GPTModel:
                         pass
             else:
                 assistant_response = response['choices'][0]['message']['content']
-                if assistant_response == None:
+                if not assistant_response:
                     assistant_response = response['choices'][0]['message']['function_call']
 
             return assistant_response
@@ -137,6 +137,7 @@ class GPTModel:
             del self.conversation[1]
 
     def dump(self):
-        print(self.conversation)
         return str(self.conversation)
     
+    def pretty_dump(self):
+        return '\n'.join([f'{message["role"]}: \n{message["content"]}' for message in self.conversation])
