@@ -273,6 +273,7 @@ class CharacterSheet:
         self.HP = new_HP
  
     def set_ability_score(self, name, value):
+        print("--------------------------------------------------", name, value)
         if self.logging and self.ability_scores[name] != value:
             self.log.append(f'{name}: {self.ability_scores[name]} -> {value}')
  

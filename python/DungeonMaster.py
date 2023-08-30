@@ -73,29 +73,7 @@ class DungeonMaster:
             depending on the conversation between the dungeon master and the user.
         ''')
 
-
-    def get_context(self):
-        context = "Here is a summary of the whole adventure so far: \n"
-        context += self.conversation.ancient + "\n"
-        context += "Here is a summary of only more recent events: \n"
-        context += self.conversation.recent + "\n"
-        context += "Here is a summary of the currently unfolding events: \n"
-        context += self.conversation.current + "\n"
-        context += "Finally, here are the most recent exchanges between the DM and the user: \n"
-        context += self.conversation.dump(-4)
-
-        context += "\n Character sheet: \n"
-        context += self.char.print()
-
-        return context
-    
-    def create_new_character(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA):
-        self.char = CharacterSheet.CharacterSheet(name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA)
-        self.available_functions["level_up"] = self.char.level_up
-
-    def execute_controller(self, context):
-
-        available_functions_json = [
+        self.available_functions_json = [
             {
                 "name": "finish",
                 "description": "Call this function to finish your operations when all the necessary changes have been implemented.",
@@ -111,6 +89,24 @@ class DungeonMaster:
                 "parameters": {
                     "type": "object",
                     "properties": {}
+                },
+                "required": []
+            },
+            {
+                "name": "set_ability_score",
+                "description": "The name of the ability is one of 'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'. The value is an integer.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The ability score which is to be cset to a new value"
+                        },
+                        "value": {
+                            "type": "number",
+                            "description": "The new value"
+                        }
+                    }
                 },
                 "required": []
             },
@@ -174,6 +170,30 @@ class DungeonMaster:
             "create_character": self.create_new_character
         } 
 
+
+    def get_context(self):
+        context = "Here is a summary of the whole adventure so far: \n"
+        context += self.conversation.ancient + "\n"
+        context += "Here is a summary of only more recent events: \n"
+        context += self.conversation.recent + "\n"
+        context += "Here is a summary of the currently unfolding events: \n"
+        context += self.conversation.current + "\n"
+        context += "Finally, here are the most recent exchanges between the DM and the user: \n"
+        context += self.conversation.dump(-4)
+
+        context += "\n Character sheet: \n"
+        context += self.char.print()
+
+        return context
+    
+    def create_new_character(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA):
+        self.char = CharacterSheet.CharacterSheet(name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA)
+        self.available_functions["level_up"] = self.char.level_up
+        self.available_functions["set_ability_score"] = self.char.set_ability_score
+
+    def execute_controller(self, context):
+
+        extended_context = f'Here is the relevant context: {context}\n Character sheet: \n {("The user currently has no character sheet." if not self.char else self.char.print())}'
         self.model_controller.reset()
         self.model_controller.set_system_prompt('''
             You are an assistant for a Dungeons and Dragons 5th edition video game.
@@ -187,7 +207,7 @@ class DungeonMaster:
             Start your reply with "Changes to be made to the character sheet". Then follow with the list.
         ''')
 
-        todo_list = self.model_controller.generate_assistant_reply(f'Here is the relevant context: {context}')
+        todo_list = self.model_controller.generate_assistant_reply(extended_context)
 
         self.model_controller.reset()
         self.model_controller.set_system_prompt('''
@@ -199,11 +219,11 @@ class DungeonMaster:
             You then have to call one or multiple functions that perform the appropriate operations. 
             When you have performed all the required changes, call the finish() function.
         ''')
-        self.model_controller.functions = available_functions_json
+        self.model_controller.functions = self.available_functions_json
 
         total_log = ''
 
-        message = f'Here is the relevant context: {context}\n'
+        message = extended_context
         message += f'{todo_list}\n'
         message += 'Please call a function: Either make a change to the character sheet, or call finish()'
         finished = False
@@ -267,4 +287,6 @@ class DungeonMaster:
 
 dm = DungeonMaster()
 dm.initialize()
-dm.execute_controller("DM: So what will be your character? User: My character will be a Cleric named Adric. He is a dwarf. His stats are, in order, 10, 11, 12, 13, 14, 15. His proficiencies are Athletics and Medicine.")
+
+while True:
+    dm.execute_controller(input("-> "))
