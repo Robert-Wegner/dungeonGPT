@@ -1,8 +1,4 @@
-import requests
-import json
 import os
-import random
-import re
 import openai
 import time
 import os
@@ -24,7 +20,7 @@ DICE_ROLL_PROMPT = read_file("prompts/dice_roll_prompt.txt")
 
 class GPTModel:
   
-    def __init__(self, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT+DICE_ROLL_PROMPT):
+    def __init__(self, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT+DICE_ROLL_PROMPT, temperature=0.5):
         self.model = model
         self.conversation = [{"role": "system", "content": ""}]
         self.max_characters = 15000
@@ -35,6 +31,7 @@ class GPTModel:
         self.stream = False
         self.stream_callback = lambda text: print_stream(text)
         self.functions = []
+        self.temperature = temperature
 
     def get_system_prompt(self):
         return self.conversation[0]["content"]
@@ -76,7 +73,7 @@ class GPTModel:
                 response = openai.ChatCompletion.create(
                     model = self.model,
                     messages = self.conversation,
-                    temperature = 0,
+                    temperature = self.temperature,
                     stream = self.stream,  # this time, we set stream=True,
                     functions = self.functions
                 )
@@ -84,7 +81,7 @@ class GPTModel:
                 response = openai.ChatCompletion.create(
                     model = self.model,
                     messages = self.conversation,
-                    temperature = 0,
+                    temperature = self.temperature,
                     stream = self.stream,  # this time, we set stream=True,
                 )
 
@@ -101,9 +98,13 @@ class GPTModel:
                     except:
                         pass
             else:
-                assistant_response = response['choices'][0]['message']['content']
-                if not assistant_response:
-                    assistant_response = response['choices'][0]['message']['function_call']
+
+                assistant_response = response['choices'][0]['message']
+                if assistant_response.get('function_call'):
+                    return assistant_response['function_call']
+                else:
+                    return assistant_response['content']
+                
 
             return assistant_response
 
@@ -111,13 +112,16 @@ class GPTModel:
             print("Error: ", error)
             return "Error generating response."
         
-    def generate_assistant_reply(self, message=False):
+    def generate_assistant_reply(self, message=False, append=True):
         if message:
             self.reply_as_user(message)
 
         reply = self.generate()
+        if not append:
+            return reply
+        
         if reply:
-            self.reply_as_assistant(reply)
+            self.reply_as_assistant(str(reply))
 
         self.prune()
         return reply
@@ -140,4 +144,4 @@ class GPTModel:
         return str(self.conversation)
     
     def pretty_dump(self):
-        return '\n'.join([f'{message["role"]}: \n{message["content"]}' for message in self.conversation])
+        return '\n\n'.join([f'{message["role"]}: {message["content"]}' for message in self.conversation])

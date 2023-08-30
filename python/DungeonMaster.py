@@ -67,13 +67,10 @@ class DungeonMaster:
                 #ancient_max_chars = 1000, current_max_chars = 400)
             pass
 
-        self.model_controller = GPTModel.GPTModel(model="gpt-3.5-turbo", system_prompt='''
+        self.model_controller = GPTModel.GPTModel(model="gpt-4", temperature=0.5, system_prompt='''
             You are a controller for a Dungeons and Dragons 5th edition video game.
             This means that your task is to call functions that update the state of the system 
             depending on the conversation between the dungeon master and the user.
-            Initially you will be shown a summary of the recent events and then the most recent exchange between dungeon master and user.
-            You then have to call one or multiple functions that perform the appropriate operations. 
-            When you have performed all the required changes, call the exit() function.
         ''')
 
 
@@ -94,10 +91,20 @@ class DungeonMaster:
     
     def create_new_character(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA):
         self.char = CharacterSheet.CharacterSheet(name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA)
+        self.available_functions["level_up"] = self.char.level_up
 
     def execute_controller(self, context):
 
         available_functions_json = [
+            {
+                "name": "finish",
+                "description": "Call this function to finish your operations when all the necessary changes have been implemented.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "required": []
+            },
             {
                 "name": "level_up",
                 "description": "The character gains 1 level.",
@@ -163,42 +170,73 @@ class DungeonMaster:
             },
         ]
 
-        available_functions = {
+        self.available_functions = {
             "create_character": self.create_new_character
         } 
-        if self.char:
-            available_functions.extend({
-                "level_up": self.char.level_up
-                }
-            )
 
         self.model_controller.reset()
-        self.model_controller.set_system_prompt(f'{self.model_controller.get_system_prompt()} \n Here is the relevant context:\n{context}')
+        self.model_controller.set_system_prompt('''
+            You are an assistant for a Dungeons and Dragons 5th edition video game.
+            You will be shown a summary of the recent events and then the most recent exchange between dungeon master and user.
+            Your task is to create an ordered list of changes that have to be made to the user's character sheet. Be precise and detailed.
+            The changes that are necessary will be evident from the conversation between the user and the dungeon master. 
+            Please ONLY include changes in the list that were EXPLICITLY mentioned by the dungeon master. 
+            Do not include changes that only the user has stated. Only the word of the dungeon master matters. Do not jump to conclusions. Do not jump ahead.
+            It may be the case that no changes are necessary. In this case, please state so in your reply.
+            Please do not elaborate before or after your reply on your task. 
+            Start your reply with "Changes to be made to the character sheet". Then follow with the list.
+        ''')
+
+        todo_list = self.model_controller.generate_assistant_reply(f'Here is the relevant context: {context}')
+
+        self.model_controller.reset()
+        self.model_controller.set_system_prompt('''
+            You are a controller for a Dungeons and Dragons 5th edition video game.
+            This means that your task is to call functions that update the state of the system 
+            depending on the conversation between the dungeon master and the user.
+            Initially you will be shown a summary of the recent events and then the most recent exchange between dungeon master and user.
+            Then you will be shown an ordered list of changes that should be made to the character sheet.
+            You then have to call one or multiple functions that perform the appropriate operations. 
+            When you have performed all the required changes, call the finish() function.
+        ''')
         self.model_controller.functions = available_functions_json
 
         total_log = ''
 
+        message = f'Here is the relevant context: {context}\n'
+        message += f'{todo_list}\n'
+        message += 'Please call a function: Either make a change to the character sheet, or call finish()'
         finished = False
-        attempts = 0
-        while not finished and attempts <= 12:
-            attempts += 1
-            reply = self.model_controller.generate_assistant_reply('Please call a function: Either make another change to the character sheet, or call exit()')
-            print(f"\n\nAttempt: {attempts}\n")
+        counter = 0
+        fails = 0
+        while not finished and fails <= 3 and counter <= 6:
+            print(f"\nFails: {fails}\nCounter: {counter}\n")
             print(self.model_controller.pretty_dump())
-            print("REPLY = ", reply)
-            if type(reply) == dict:
-                if reply.get("name") == "exit":
+
+            reply = self.model_controller.generate_assistant_reply(message, append=False)
+            if not isinstance(reply, str):
+
+                if reply.get("name") == "finish":
                     finished = True
                     return total_log
             
                 elif reply.get("name"):
                     function_name = reply["name"]
-                    function_to_call = available_functions[function_name]
+                    function_to_call = self.available_functions[function_name]
                     function_args = json.loads(reply["arguments"])
                     function_to_call(**function_args)
 
-                    total_log += self.char.print_log() + '\n'
+                    total_log = self.char.print_log() + '\n'
+                    self.model_controller.reply_as_assistant(f'The function {function_name} has been called. Here is the log of changes that resulted: {total_log}')
+                    message = 'Please call a function: Either make another change to the character sheet, or call finish()'
+
                     self.char.clear_log()
+
+            else:
+                fails += 1
+                self.model_controller.reply_as_assistant(reply)
+                message = 'Please correctly call a function: Either make another change to the character sheet, or call finish()'
+            counter += 1
 
     def get_experts_initial(context):
         return "No tips needed."
@@ -229,3 +267,4 @@ class DungeonMaster:
 
 dm = DungeonMaster()
 dm.initialize()
+dm.execute_controller("DM: So what will be your character? User: My character will be a Cleric named Adric. He is a dwarf. His stats are, in order, 10, 11, 12, 13, 14, 15. His proficiencies are Athletics and Medicine.")
