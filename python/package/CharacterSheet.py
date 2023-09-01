@@ -1,5 +1,6 @@
 import os
 import sys
+import pickle
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from data.character.feats import feats as FEATS
 from data.character.race_traits import elf_race_traits as ELF_RACE_TRAITS
@@ -21,7 +22,6 @@ from data.character.class_features import ranger_class_features as RANGER_CLASS_
 from data.character.class_features import rogue_class_features as ROGUE_CLASS_FEATURES
 from data.character.class_features import sorcerer_class_features as SORCERER_CLASS_FEATURES
 from data.character.class_features import wizard_class_features as WIZARD_CLASS_FEATURES
- 
 all_classes = [
     'Barbarian',
     'Bard',
@@ -34,8 +34,16 @@ all_classes = [
     'Sorcerer',
     'Wizard'
 ]
- 
- 
+
+def get_file_path(file_path):
+    file_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    new_path = os.path.join(file_dir, file_path)
+    return os.path.abspath(os.path.realpath(new_path))
+
+with open(get_file_path("data/spells.p"), "rb") as f:
+    spell_dictionary = pickle.load(f)
+
+
 class CharacterSheet:
  
     def __init__(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, #choose 2, options depending on class
@@ -467,6 +475,18 @@ class CharacterSheet:
             self.log.append(f'Wild Shapes: {self.wild_shape_num} -> {amount}')
         self.wild_shape_num = amount
  
+    def add_spell(self, spell_name, spell_level, spell_description):
+        if self.logging and not any(spell['name'] == spell_name for spell in self.spells):
+            self.log.append(f'Added spell: {spell_name}')
+        self.spells.append({'name': spell_name,
+                            'level': spell_level,
+                            'description': spell_description})
+        
+    def remove_spell(self, spell_name):
+        if self.logging and any(spell['name'] == spell_name for spell in self.spells):
+            self.log.append(f'Removed spell: {spell_name}')
+        self.spells = [spell for spell in self.spells if spell['name'] != spell_name]
+
     def give_XP(self, amount):
         if self.logging and amount > 0:
             self.log.append(f'XP: {self.XP} -> {self.XP + amount}')
@@ -501,7 +521,11 @@ class CharacterSheet:
                 if feature['level'] == self.level:
                     self.add_feature(feature['name'], feature['description'])
  
- 
+            new_spells = self.compute_spells(self.level)
+            for spell in new_spells:
+                if spell['name'] not in self.spells:
+                    self.add_spell(spell['name'], spell['level'], spell['description'])
+
     def level_up_with_ability_score_improvement(self, first_ability_name, second_ability_name):
         self.set_ability_score(first_ability_name, self.ability_scores[first_ability_name] + 1)
         self.set_ability_score(second_ability_name, self.ability_scores[second_ability_name] + 1)
@@ -837,7 +861,9 @@ class CharacterSheet:
             99999999,
             99999999
         ]
- 
+
+    def compute_spells(self, spell_level):
+        return [spell for spell in spell_dictionary if spell['level'] == spell_level and self.character_class in spell['classes']]
  
     def update_condition_timers(self, days, hours, minutes, seconds):
         for (i, condition) in enumerate(self.conditions):
@@ -866,6 +892,8 @@ class CharacterSheet:
         return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}m {duration["seconds"]}s'
  
  
-#char = CharacterSheet("Adric", "Dwarf", "Druid", ["investigation", "intimidation"], 10, 11, 12, 13, 14, 15)
+char = CharacterSheet("Adric", "Dwarf", "Druid", "investigation", "intimidation", 10, 11, 12, 13, 14, 15)
  
+print([spell['name'] for spell in char.compute_spells(1)])
+
 #print(char.print())

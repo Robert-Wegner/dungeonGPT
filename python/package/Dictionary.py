@@ -156,9 +156,9 @@ class Dictionary:
         pickle.dump(self.magic_items, open(get_file_path("data/magic_items.p"), "wb"))
         pickle.dump(self.spells, open(get_file_path("data/spells.p"), "wb"))
         pickle.dump(self.monsters, open(get_file_path("data/monsters.p"), "wb"))
-        pickle.dump(self.df_magic_items, open(get_file_path("data/df_magic_items.p"), "wb"))
-        pickle.dump(self.df_spells, open(get_file_path("data/df_spells.p"), "wb"))
-        pickle.dump(self.df_monsters, open(get_file_path("data/df_monsters.p"), "wb"))
+        #pickle.dump(self.df_magic_items, open(get_file_path("data/df_magic_items.p"), "wb"))
+        #pickle.dump(self.df_spells, open(get_file_path("data/df_spells.p"), "wb"))
+        #pickle.dump(self.df_monsters, open(get_file_path("data/df_monsters.p"), "wb"))
         
     def save_everything_to_pickle(self):
         pickle.dump(self.df_everything, open(get_file_path("data/df_everything.p"), "wb"))
@@ -225,7 +225,7 @@ class Dictionary:
 
         self.spells = []
 
-        classes = ['sorcerer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'warlock', 'wizard']
+        classes = ['Sorcerer', 'Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Warlock', 'Wizard']
 
         for class_name in classes:
             file_path = get_file_path(f"data/{class_name}_spells.txt")
@@ -333,7 +333,10 @@ class Dictionary:
 
 dict = Dictionary()
 
-dict.load_everything_embedded_from_pickle()
+dict.load_from_text()
+dict.save_individual_to_pickle()
+
+#dict.load_everything_embedded_from_pickle()
 
 print(dict.df_everything)
 while True:
