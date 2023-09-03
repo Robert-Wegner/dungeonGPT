@@ -199,7 +199,8 @@ class CharacterSheet:
  
         self.logging = True
         self.log.append(f'The character has been created!\n{self.print()}\n')
- 
+        self.errors = []
+
     def clear_log(self):
         self.log = []
  
@@ -356,7 +357,7 @@ class CharacterSheet:
         self.sorcery_points = amount
     def use_sorcery_points(self, amount):
         self.set_sorcery_points(self.sorcery_points - amount)
-    def use_sorcery_points(self, amount):
+    def gain_sorcery_points(self, amount):
         self.set_sorcery_points(self.sorcery_points + amount)
  
  
@@ -377,7 +378,7 @@ class CharacterSheet:
  
         self.gain_max_spell_slots(level, 1)
  
-    def create_sorcery_points_from_max_spell_slots(self, level):
+    def create_sorcery_points_from_spell_slots(self, level):
         if self.logging:
             self.log.append(f'Converting spell slot of level {level} to sorcery points')
  
@@ -488,10 +489,6 @@ class CharacterSheet:
             self.log.append(f'Wild Shapes: {self.wild_shape_num} -> {amount}')
         self.wild_shape_num = amount
  
-    def activate_rage(self):
-        self.set_rages(self.rages, self.rages - 1)
-        self.add_condition('Rage', 'Rage is active', 0, 0, 1, 0)
- 
     def add_spell(self, spell_name, spell_level, spell_description):
         if self.logging and not any(spell['name'] == spell_name for spell in self.spells):
             self.log.append(f'Added spell: {spell_name}')
@@ -530,6 +527,7 @@ class CharacterSheet:
                 self.log.append(f'Level: {self.level} -> {self.level+1}')
             self.level += 1
             self.set_max_HP(self.max_HP + int(self.hit_dice[1:])//2 + self.ability_modifiers['CON'] + (1 if self.race == 'Dwarf' else 0))
+            self.set_proficiency_bonus(self.compute_proficiency_bonus)
             self.set_max_spell_slots(self.compute_max_spell_slots())
             self.set_max_sorcery_points(self.compute_max_sorcery_points())
             self.set_rage_damage(self.compute_rage_damage())
@@ -575,26 +573,6 @@ class CharacterSheet:
         self.set_rages(self.max_rages)
         self.set_sorcery_points(self.max_sorcery_points)
         self.set_wild_shape_num(self.max_wild_shape_num)
- 
-    def add_equipment(self, name, description):
-        self.equipment.append({'name': name, 'description': description})
- 
-    def modify_equipment(self, name, new_description):
-        index = next(i for (i, item) in enumerate(self.equipment) if item["name"] == name)
-        self.equipment[index]['description'] = new_description
- 
-    def remove_equipment(self, name):
-        self.equipment.pop(next(i for (i, item) in enumerate(self.equipment) if item["name"] == name))
- 
-    def add_inventory(self, name, description):
-        self.inventory.append({'name': name, 'description': description})
- 
-    def modify_inventory(self, name, new_description):
-        index = next(i for (i, item) in enumerate(self.equipment) if item["name"] == name)
-        self.inventory[index]['description'] = new_description
- 
-    def remove_inventory(self, name):
-        self.inventory.pop(next(i for (i, item) in enumerate(self.equipment) if item["name"] == name))
  
  
     def print(self, feature_descriptions=True, item_descriptions=True, spell_descriptions=False):
@@ -920,7 +898,51 @@ class CharacterSheet:
     def duration_to_string(self, duration):
         return f'{duration["days"]}d {duration["hours"]}h {duration["minutes"]}m {duration["seconds"]}s'
  
- 
+class ManagedCharacterSheet(CharacterSheet):
+
+    def __init__(self):
+        super()
+
+        self.functions = {
+            'set_spell_attack_bonus': self.set_spell_attack_bonus,
+            'set_spell_save_DC': self.set_spell_save_DC,
+            'set_proficiency_bonus': self.set_proficiency_bonus,
+            'set_skill_bonus': self.set_skill_bonus,
+            'add_skill_proficiency': self.add_skill_proficiency,
+            'remove_skill_proficiency': self.remove_skill_proficiency,
+            'set_AC': self.set_AC,
+            'set_max_HP': self.set_max_HP,
+            'set_HP': self.set_HP,
+            'set_ability_score': self.set_ability_score,
+            'use_spell_slots': self.use_spell_slots,
+            'gain_spell_slots': self.gain_spell_slots,
+            'use_sorcery_points': self.use_sorcery_points,
+            'gain_sorcery_points': self.gain_sorcery_points,
+            'create_spellslot_from_sorcery_points': self.create_spellslot_from_sorcery_points,
+            'create_sorcery_points_from_spell_slots': self.create_sorcery_points_from_spell_slots,
+            'activate_rage': self.activate_rage,
+            'activate_wild_shape': self.activate_wild_shape,
+            'deactivate_wild_shape': self.deactivate_wild_shape,
+            'add_condition': self.add_condition,
+            'remove_condition': self.remove_condition,
+            'add_inventory_item': self.add_inventory_item,
+            'remove_inventory_item': self.remove_inventory_item,
+            'modify_inventory_item': self.modify_inventory_item,
+            'add_equipmentitem': self.add_equipmentitem,
+            'remove_equipment_item': self.remove_equipment_item,
+            'modify_equipment_item': self.modify_equipment_item,
+            'activate_wild_shape': self.activate_wild_shape,
+            'deactivate_wild_shape': self.deactivate_wild_shape,
+            'add_spell': self.add_spell,
+            'give_XP': self.give_XP,
+            'level_up': self.level_up,
+            'level_up_with_ability_score_improvement': self.level_up_with_ability_score_improvement,
+            'level_up_with_feat': self.level_up_with_feat,
+            'add_feature': self.add_feature,
+            'remove_feature': self.remove_feature,
+            'rest': self.rest
+        }
+        
 char = CharacterSheet("Adric", "Dwarf", "Druid", "investigation", "intimidation", 10, 11, 12, 13, 14, 15)
  
 print([spell['name'] for spell in char.compute_spells(1)])
