@@ -395,17 +395,18 @@ class CharacterSheet:
         self.use_max_spell_slots(level, 1)
  
     def activate_rage(self):
-        if self.logging:
-            self.log.append(f'Rages: {self.rages} -> {self.rages - 1}')
- 
-        self.rages -= 1
- 
+        self.set_rages(self.rages, self.rages - 1)
         self.add_condition('Rage', 'Rage is active', 0, 0, 0, 0)
  
     def set_max_rages(self, amount):
         if self.logging and self.max_rages != amount:
             self.log.append(f'Max rages: {self.max_rages} -> {amount}')
         self.max_rages = amount
+
+    def set_rages(self, amount):
+        if self.logging and self.rages != amount:
+            self.log.append(f'Rages: {self.rages} -> {amount}')
+        self.rages = amount
  
     def set_rage_damage(self, new_damage):
         if self.logging and self.rage_damage != new_damage:
@@ -470,10 +471,26 @@ class CharacterSheet:
             if item['name'] == name:
                 item['description'] = description
  
+    def activate_wild_shape(self, beast_name):
+        self.set_wild_shape_num(self.wild_shape_num - 1)
+        self.add_condition('Wild Shape', f'Transformed into a {beast_name}', 0, self.level // 2, 0, 0)
+
+    def deactivate_wild_shape(self):
+        self.remove_condition('Wild Shape')
+
+    def set_max_wild_shape_num(self, amount):
+        if self.logging and self.max_wild_shape_num != amount:
+            self.log.append(f'Max Wild shapes: {self.max_wild_shape_num} -> {amount}')
+        self.max_wild_shape_num = amount
+
     def set_wild_shape_num(self, amount):
         if self.logging and self.wild_shape_num != amount:
             self.log.append(f'Wild Shapes: {self.wild_shape_num} -> {amount}')
         self.wild_shape_num = amount
+ 
+    def activate_rage(self):
+        self.set_rages(self.rages, self.rages - 1)
+        self.add_condition('Rage', 'Rage is active', 0, 0, 1, 0)
  
     def add_spell(self, spell_name, spell_level, spell_description):
         if self.logging and not any(spell['name'] == spell_name for spell in self.spells):
@@ -580,7 +597,7 @@ class CharacterSheet:
         self.inventory.pop(next(i for (i, item) in enumerate(self.equipment) if item["name"] == name))
  
  
-    def print(self):
+    def print(self, feature_descriptions=True, item_descriptions=True, spell_descriptions=False):
         nl = '\n'
         t = '      '
         text = ''
@@ -607,11 +624,20 @@ class CharacterSheet:
         text += f'Proficency bonus: {self.proficiency_bonus} \n'
         text += f'Skills: \n{nl.join([t + name + ": " + str(self.skills[name]) + (" (proficient)" if name in self.skill_proficiencies else "") for name in self.skills.keys()])} \n'
  
-        text += f'Equipment: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.equipment])} \n'
-        text += f'Inventory: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.inventory])} \n'
+        if item_descriptions:
+            text += f'Equipment: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.equipment])} \n'
+            text += f'Inventory: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.inventory])} \n'
+        else:
+            text += f'Equipment: \n{", ".join([t + item["name"] for item in self.equipment])}'
+            text += f'Equipment: \n{", ".join([t + item["name"] for item in self.inventory])}'
  
-        text += f'Race traits: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.race_traits])} \n'
-        text += f'Features: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.features])} \n'
+        if feature_descriptions:
+            text += f'Race traits: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.race_traits])} \n'
+            text += f'Features: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.features])} \n'
+        else:
+            text += f'Race traits: \n {", ".join([t + item["name"] for item in self.race_traits])} \n'
+            text += f'Features: \n {", ".join([t + item["name"] for item in self.features])} \n'
+
         text += f'Conditions: \n {nl.join([t + condition["name"] + ": " + condition["description"] + " (Duration: " + self.duration_to_string(condition["duration"]) + ")" for condition in self.conditions])} \n'
  
         text += 'Spellcasting. \n'
@@ -620,8 +646,11 @@ class CharacterSheet:
         text += f'Spell attack bonus: {self.spell_attack_bonus}{t}'
         text += f'Spell save DC: {self.spell_save_DC} \n'
         text += f'Spell slots: {", ".join(["Level " + str(i+1) + ": " + str(self.spell_slots[i]) + "/" + str(val) for (i, val) in enumerate(self.max_spell_slots)])} \n'
-        text += f'{"Spells" if self.character_class != "wizard" else "Spellbook"}: {", ".join([spell for spell in self.spells])} \n'
- 
+        if spell_descriptions: 
+            text += f'{"Spells" if self.character_class != "wizard" else "Spellbook"}: {nl.join([spell["name"] + ": " + spell["description"] for spell in self.spells])} \n'
+        else:
+            text += f'{"Spells" if self.character_class != "wizard" else "Spellbook"}: {", ".join([spell["name"] for spell in self.spells])} \n'
+
         if self.character_class == 'Sorcerer':
             text += f'Sorcery points: {self.sorcery_points}/{self.max_sorcery_points} \n'
  
