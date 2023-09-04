@@ -2,7 +2,7 @@ import os
 import openai
 import time
 import os
-from .files import read_file
+from files import read_file
 
 def print_stream(string):
     for c in string:
@@ -23,7 +23,7 @@ class GPTModel:
     def __init__(self, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT+DICE_ROLL_PROMPT, temperature=0.5):
         self.model = model
         self.conversation = [{"role": "system", "content": ""}]
-        self.max_characters = 15000
+        self.max_characters = 40000
         self.set_system_prompt(system_prompt)
         self.settings = {}
         self.api_url = "https://api.openai.com/v1/chat/completions"
@@ -110,7 +110,7 @@ class GPTModel:
 
         except Exception as error:
             print("Error: ", error)
-            return "Error generating response."
+            return f"Error generating response: {error}"
         
     def generate_assistant_reply(self, message=False, append=True):
         if message:
