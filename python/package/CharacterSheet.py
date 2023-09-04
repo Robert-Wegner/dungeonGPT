@@ -251,12 +251,13 @@ class CharacterSheet:
             self.logging = True
         self.set_proficiency_bonus(old_bonus)
  
-    def add_skill_proficiency(self, new_proficiency):
-        if new_proficiency not in self.skill_proficiencies:
-            self.set_skill_proficiencies(self.skill_proficiencies.copy().append(new_proficiency))
-    def remove_skill_proficiency(self, new_proficiency):
-        if new_proficiency in self.skill_proficiencies:
-            self.set_skill_proficiencies(self.skill_proficiencies.copy().remove(new_proficiency))
+    def add_skill_proficiency(self, skill_name):
+        if skill_name not in self.skill_proficiencies:
+            self.set_skill_proficiencies(self.skill_proficiencies.copy().append(skill_name))
+
+    def remove_skill_proficiency(self, skill_name):
+        if skill_name in self.skill_proficiencies:
+            self.set_skill_proficiencies(self.skill_proficiencies.copy().remove(skill_name))
  
     def set_spellcasting_ability_mod(self, new):
         if self.logging and self.spellcasting_ability_mod != new:
@@ -378,7 +379,7 @@ class CharacterSheet:
  
         self.gain_max_spell_slots(level, 1)
  
-    def create_sorcery_points_from_spell_slots(self, level):
+    def create_sorcery_points_from_spell_slot(self, level):
         if self.logging:
             self.log.append(f'Converting spell slot of level {level} to sorcery points')
  
@@ -918,8 +919,8 @@ class ManagedCharacterSheet(CharacterSheet):
             'gain_spell_slots': self.gain_spell_slots,
             'use_sorcery_points': self.use_sorcery_points,
             'gain_sorcery_points': self.gain_sorcery_points,
-            'create_spellslot_from_sorcery_points': self.create_spellslot_from_sorcery_points,
-            'create_sorcery_points_from_spell_slots': self.create_sorcery_points_from_spell_slots,
+            'create_spell_slot_from_sorcery_points': self.create_spell_slot_from_sorcery_points,
+            'create_sorcery_points_from_spell_slot': self.create_sorcery_points_from_spell_slot,
             'activate_rage': self.activate_rage,
             'activate_wild_shape': self.activate_wild_shape,
             'deactivate_wild_shape': self.deactivate_wild_shape,
@@ -931,8 +932,6 @@ class ManagedCharacterSheet(CharacterSheet):
             'add_equipmentitem': self.add_equipmentitem,
             'remove_equipment_item': self.remove_equipment_item,
             'modify_equipment_item': self.modify_equipment_item,
-            'activate_wild_shape': self.activate_wild_shape,
-            'deactivate_wild_shape': self.deactivate_wild_shape,
             'add_spell': self.add_spell,
             'give_XP': self.give_XP,
             'level_up': self.level_up,
@@ -942,6 +941,272 @@ class ManagedCharacterSheet(CharacterSheet):
             'remove_feature': self.remove_feature,
             'rest': self.rest
         }
+
+        
+        self.functions_json = [{'name': 'set_spell_attack_bonus'},
+                               {
+                                    "name": "set_spell_attack_bonus",
+                                    "description": "Sets the spell attack bonus to a new integer value.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_bonus": {
+                                                "type": "number",
+                                                "description": "The new spell attack bonus."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_bonus"]
+                                },
+                                {'name': 'set_spell_save_DC'},
+                                {
+                                    "name": "set_spell_save_DC",
+                                    "description": "Sets the spell save DC to a new integer value.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_DC": {
+                                                "type": "number",
+                                                "description": "The new spell save DC bonus."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_DC"]
+                                },
+                                {
+                                    "name": "set_proficiency_bonus",
+                                    "description": "Sets the proficiency bonus to a new integer value and updates other impacted stats.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_bonus": {
+                                                "type": "number",
+                                                "description": "The new proficiency bonus."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_bonus"]
+                                },
+                               {
+                                    "name": "set_skill_bonus",
+                                    "description": "Sets the skill bonus for a skill (such as Athletics) to a new integer value. ",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "skill_name": {
+                                                "type": "string",
+                                                "description": 'The name of the skill must be one of: Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth, Survival.'
+                                            },
+                                            "new_bonus": {
+                                                "type": "number",
+                                                "description": "The new bonus."
+                                            },
+                                        }
+                                    },
+                                    "required": ["skill_name", "new_bonus"]
+                                },
+                                {
+                                    "name": "add_skill_proficiency",
+                                    "description": "Adds a skill proficiency by name. The name must be capitalized.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "skill_name": {
+                                                "type": "string",
+                                                "description": 'The skill proficiency to be added must be one of: Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth, Survival.'
+                                            },
+                                        }
+                                    },
+                                    "required": ["skill_name"]
+                                },
+                                {
+                                    "name": "remove_skill_proficiency",
+                                    "description": "Removes a skill proficiency by name. The name must be capitalized.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "skill_name": {
+                                                "type": "string",
+                                                "description": 'The skill proficiency to be removed must be one of: Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth, Survival.'
+                                            },
+                                        }
+                                    },
+                                    "required": ["skill_name"]
+                                },
+                                {
+                                    "name": "set_AC",
+                                    "description": "Sets AC to a new integer value. ",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_AC": {
+                                                "type": "number",
+                                                "description": "The new AC."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_AC"]
+                                },
+                                {
+                                    "name": "set_max_HP",
+                                    "description": "Sets max_HP to a new integer value. ",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_max_HP": {
+                                                "type": "number",
+                                                "description": "The new max_HP."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_max_HP"]
+                                },
+                                {
+                                    "name": "set_HP",
+                                    "description": "Sets HP to a new integer value. ",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new_HP": {
+                                                "type": "number",
+                                                "description": "The new HP."
+                                            },
+                                        }
+                                    },
+                                    "required": ["new_HP"]
+                                },
+                                {
+                                    "name": "set_ability_score",
+                                    "description": "Sets one of the abilities 'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA' to a new integer value and updated other impacted stats. ",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "description": "The ability score which is to be set to a new value."
+                                            },
+                                            "value": {
+                                                "type": "number",
+                                                "description": "The new value, must be an integer."
+                                            }
+                                        }
+                                    },
+                                    "required": ["name", "value"]
+                                },
+                                {
+                                    "name": "use_spell_slots",
+                                    "description": "Uses up a number of spell slots of a certain level.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "spell_level": {
+                                                "type": "number",
+                                                "description": "The level of spell slot to use."
+                                            },
+                                            "amount": {
+                                                "type": "number",
+                                                "description": "The amount of spell slots to use."
+                                            },
+                                        }
+                                    },
+                                    "required": ["spell_level", "amount"]
+                                },
+                                {
+                                    "name": "gain_spell_slots",
+                                    "description": "Gains up a number of spell slots of a certain level.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "spell_level": {
+                                                "type": "number",
+                                                "description": "The level of spell slot to gain."
+                                            },
+                                            "amount": {
+                                                "type": "number",
+                                                "description": "The amount of spell slots to gain."
+                                            },
+                                        }
+                                    },
+                                    "required": ["spell_level", "amount"]
+                                },
+                                {
+                                    "name": "use_sorcery_points",
+                                    "description": "Uses up a number of sorcery points.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "amount": {
+                                                "type": "number",
+                                                "description": "Amount of sorcery points that are used."
+                                            },
+                                        }
+                                    },
+                                    "required": ["amount"]
+                                },
+                                {
+                                    "name": "gain_sorcery_points",
+                                    "description": "Gains up a number of sorcery points.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "amount": {
+                                                "type": "number",
+                                                "description": "Amount of sorcery points that are gained."
+                                            },
+                                        }
+                                    },
+                                    "required": ["amount"]
+                                },
+                                {
+                                    "name": "create_spell_slot_from_sorcery_points",
+                                    "description": "Creates a spell slot of desired level from sorcery points.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "level": {
+                                                "type": "number",
+                                                "description": "Level of spell slot created."
+                                            },
+                                        }
+                                    },
+                                    "required": ["level"]
+                                },
+                                {
+                                    "name": "create_sorcery_points_from_spell_slot",
+                                    "description": "Creates sorcery points from a spell slot of desired level.",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "level": {
+                                                "type": "number",
+                                                "description": "Level of spell slot used."
+                                            },
+                                        }
+                                    },
+                                    "required": ["level"]
+                                },
+                                {'name': 'activate_rage'},
+                                {'name': 'activate_wild_shape'},
+                                {'name': 'deactivate_wild_shape'},
+                                {'name': 'add_condition'},
+                                {'name': 'remove_condition'},
+                                {'name': 'add_inventory_item'},
+                                {'name': 'remove_inventory_item'},
+                                {'name': 'modify_inventory_item'},
+                                {'name': 'add_equipmentitem'},
+                                {'name': 'remove_equipment_item'},
+                                {'name': 'modify_equipment_item'},
+                                {'name': 'add_spell'},
+                                {'name': 'give_XP'},
+                                {'name': 'level_up'},
+                                {'name': 'level_up_with_ability_score_improvement'},
+                                {'name': 'level_up_with_feat'},
+                                {'name': 'add_feature'},
+                                {'name': 'remove_feature'},
+                                {'name': 'rest'}
+                            ]
+
+        
         
 char = CharacterSheet("Adric", "Dwarf", "Druid", "investigation", "intimidation", 10, 11, 12, 13, 14, 15)
  
