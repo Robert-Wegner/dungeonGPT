@@ -1,4 +1,5 @@
-
+import { Conversation } from './Conversation.js'
+import { Grid } from './Grid.js'
 
 function opposite(orientation) {
     if (orientation == "left") {
@@ -8,9 +9,24 @@ function opposite(orientation) {
         return "left"
     }
 }
+eel.expose(sayHello)
+function sayHello() {
+    console.log("Hello!")
+}
 
 window.onload = function() {
     var body = document.getElementsByTagName("body")[0]
+
+    
+    var testButton = document.createElement("div")
+    testButton.innerHTML = "Click Me!"
+    testButton.type = "button"
+    testButton.onclick = () => eel.test_function()(() => null)
+    body.appendChild(testButton)
+    var grid = new Grid()
+
+    var conversation = new Conversation()
+    body.appendChild(conversation.container)
 
     var messagebox = document.getElementById("messagebox");
     var summarybox = document.getElementById("summarybox");

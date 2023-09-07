@@ -48,6 +48,7 @@ class CharacterSheetManager:
             Be patient in this case and call functions when a change is really necessary.
             DO NOT make up information that the user or DM did not create if an argument is missing for a function.
             Often the DM and the usere are just having a chat and there are absolutely no changes necessary.
+            When you call a function, make sure to give ALL parameters, as all of them are strictly required.
             When you have performed all the required changes, call the finish() function.
             Please do not elaborate before or after your reply on your task. 
         ''')
@@ -81,13 +82,11 @@ class CharacterSheetManager:
                     function_to_call = self.functions[function_name]
                     function_args = json.loads(reply["arguments"])
                     try:
-                        if len(function_args) > 0:
-                            #print("----------", function_to_call, function_args)
-                            function_to_call(**function_args)
-                            #self.create_new_character("testname", "Dwarf", "Wizard", "Medicine", "Athletics", 10, 11, 12, 13, 14, 15)
-                        else: 
-                            function_to_call()
-
+                        #print("----------", function_to_call, function_args)
+                        #function_to_call(**function_args)
+                        print("------------ READY!!!")
+                        self.create_new_character("testname", "Dwarf", "Wizard", "Medicine", "Athletics", 10, 11, 12, 13, 14, 15)
+                        print("------------ SUCCESS!!!")
                         self.update_functions()
                         self.update_functions_json()
                         if self.character:
@@ -113,7 +112,9 @@ class CharacterSheetManager:
                 counter += 1
 
     def create_new_character(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA):
+        print("----------CLASS: ", character_class)
         self.character = CharacterSheet(name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA)
+        print("DONE")
         self.update_functions()
         self.update_functions_json()
         self.log = f'Created a new character: {name}, the {race} {character_class}! \n'

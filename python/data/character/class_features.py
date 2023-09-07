@@ -569,34 +569,34 @@ wizard_class_features = [
         "description": "Master two 3rd-level spells from your spellbook for simplified casting. These spells, once chosen, are always prepared and can be cast once without expending a spell slot. Refresh this ability with a short or long rest."
     },
     {
-        'name': 'Evocation Savant', 
-        'level': 2, 
-        'description': 'At 2nd level, copying an evocation spell into your spellbook requires half the gold and time.'
+        "name": 'Evocation Savant', 
+        "level": 2, 
+        "description": 'At 2nd level, copying an evocation spell into your spellbook requires half the gold and time.'
     },
     {
-        'name': 'Sculpt Spells', 
-        'level': 2, 
-        'description': 'At 2nd level, create safe zones within your evocation spells. Affected creatures of your choice = 1 + spell\'s level, who automatically succeed on their saves, taking no damage if they normally take half on success.'
+        "name": 'Sculpt Spells', 
+        "level": 2, 
+        "description": 'At 2nd level, create safe zones within your evocation spells. Affected creatures of your choice = 1 + spell\'s level, who automatically succeed on their saves, taking no damage if they normally take half on success.'
     },
     {
-        'name': 'Potent Cantrip', 
-        'level': 6, 
-        'description': 'From 6th level, damaging cantrips affect even dodgy creatures, inflicting half damage on successful save, with no added cantrip effects.'
+        "name": 'Potent Cantrip', 
+        "level": 6, 
+        "description": 'From 6th level, damaging cantrips affect even dodgy creatures, inflicting half damage on successful save, with no added cantrip effects.'
     },
     {
-        'name': 'Empowered Evocation', 
-        'level': 10, 
-        'description': 'From 10th level, add your Intelligence modifier to one damage roll of any wizard evocation spell you cast.'
+        "name": 'Empowered Evocation', 
+        "level": 10, 
+        "description": 'From 10th level, add your Intelligence modifier to one damage roll of any wizard evocation spell you cast.'
     },
     {
-        'name': 'Overchannel', 
-        'level': 14, 
-        'description': 'From 14th level, maximize damage of your 1st-5th level damaging wizard spell. No effect on first use, but subsequent uses pre-long rest inflict 2d12 necrotic damage per spell level, increasing by 1d12 each use, bypassing resistance and immunity.'
+        "name": 'Overchannel', 
+        "level": 14, 
+        "description": 'From 14th level, maximize damage of your 1st-5th level damaging wizard spell. No effect on first use, but subsequent uses pre-long rest inflict 2d12 necrotic damage per spell level, increasing by 1d12 each use, bypassing resistance and immunity.'
     },
     {
-        'name:': 'Spellbook',
-        'level': 1,
-        'description': '''As you gain levels, you add spells to your spellbook that reflect your arcane research and intellectual discoveries about the universe. This can come from various sources like scrolls found in your adventures or old books in libraries.
+        "name:": 'Spellbook',
+        "level": 1,
+        "description": '''As you gain levels, you add spells to your spellbook that reflect your arcane research and intellectual discoveries about the universe. This can come from various sources like scrolls found in your adventures or old books in libraries.
             To copy a spell into your spellbook, it must satisfy two conditions: it must be a wizard spell of at least 1st level and it must be a level you can prepare. You must reproduce the basic form of the spell, decode the original wizard's notation, practice the spell, then write it in your spellbook. This takes 2 hours and costs 50 gp per spell level. The fee covers materials for mastering the spell and recording it. After spending this time and money, the spell is now prepared like your other spells.
             You can copy a spell from your own spellbook into another book for backup, which is faster and easier since you know your notation and the spell. This costs 1 hour and 10 gp per spell level. If your spellbook is lost, you follow the same process to transfer your prepared spells into a new book. For additional spells, you must find new ones. Many wizards keep backup spellbooks as precaution.
             Your spellbook can have various forms, depending on your preferences.'''

@@ -2,7 +2,15 @@ import os
 import openai
 import time
 import os
-from files import read_file
+try:
+    from files import read_file
+except:
+    pass
+
+try:
+    from .files import read_file
+except:
+    pass
 
 def print_stream(string):
     for c in string:

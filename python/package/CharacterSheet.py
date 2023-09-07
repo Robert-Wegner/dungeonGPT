@@ -55,6 +55,7 @@ class CharacterSheet:
         self.name = name
         self.race = race
         self.character_class = character_class
+        print("------------CHARCLASS: ", self.character_class)
         self.level = 1
         self.level_speed = 5
         self.level_up_state = "none" #none, normal or special
@@ -170,34 +171,34 @@ class CharacterSheet:
         self.HP = self.max_HP
  
  
- 
         self.max_spell_slots = self.compute_max_spell_slots()
         self.spell_slots = self.max_spell_slots
  
         self.max_sorcery_points = self.compute_max_sorcery_points()
         self.sorcery_points = self.max_sorcery_points
  
-        self.spell_book = []
- 
         self.race_traits = self.compute_race_traits()
         self.class_features = self.compute_class_features()
+
         self.features = [feature for feature in self.class_features if feature['level'] == 1]
- 
+
         self.inventory = []
         self.equipment = []
         self.conditions = []
         self.spells = []
         self.saving_throw_proficiencies = self.compute_saving_throw_proficiencies()
- 
+
         self.max_rages = self.compute_max_rages()
         self.rages = self.max_rages
         self.rage_damage = self.compute_rage_damage()
- 
+
         self.max_wild_shape_num = self.compute_wild_shape_num()
         self.wild_shape_num = self.max_wild_shape_num
- 
+
         self.logging = True
+
         self.log.append(f'The character has been created!\n{self.print()}\n')
+
         self.errors = []
 
     def clear_log(self):
@@ -528,7 +529,7 @@ class CharacterSheet:
                 self.log.append(f'Level: {self.level} -> {self.level+1}')
             self.level += 1
             self.set_max_HP(self.max_HP + int(self.hit_dice[1:])//2 + self.ability_modifiers['CON'] + (1 if self.race == 'Dwarf' else 0))
-            self.set_proficiency_bonus(self.compute_proficiency_bonus)
+            self.set_proficiency_bonus(self.compute_proficiency_bonus())
             self.set_max_spell_slots(self.compute_max_spell_slots())
             self.set_max_sorcery_points(self.compute_max_sorcery_points())
             self.set_rage_damage(self.compute_rage_damage())
@@ -615,22 +616,27 @@ class CharacterSheet:
         else:
             text += f'Equipment: \n{", ".join([t + item["name"] for item in self.equipment])}'
             text += f'Equipment: \n{", ".join([t + item["name"] for item in self.inventory])}'
- 
+        print("------------SOFAR: ")
+        from pprint import pprint
+        print(self.features)
+        print(self.class_features)
         if feature_descriptions:
             text += f'Race traits: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.race_traits])} \n'
             text += f'Features: \n {nl.join([t + item["name"] + ": " + item["description"] for item in self.features])} \n'
         else:
             text += f'Race traits: \n {", ".join([t + item["name"] for item in self.race_traits])} \n'
             text += f'Features: \n {", ".join([t + item["name"] for item in self.features])} \n'
+        print("------------POST: ")
 
         text += f'Conditions: \n {nl.join([t + condition["name"] + ": " + condition["description"] + " (Duration: " + self.duration_to_string(condition["duration"]) + ")" for condition in self.conditions])} \n'
- 
+
         text += 'Spellcasting. \n'
         text += f'Spellcasting ability: {self.spellcasting_ability}{t}'
         text += f'Spellcasting ability modifier: {self.spellcasting_ability_mod}{t}'
         text += f'Spell attack bonus: {self.spell_attack_bonus}{t}'
         text += f'Spell save DC: {self.spell_save_DC} \n'
         text += f'Spell slots: {", ".join(["Level " + str(i+1) + ": " + str(self.spell_slots[i]) + "/" + str(val) for (i, val) in enumerate(self.max_spell_slots)])} \n'
+
         if spell_descriptions: 
             text += f'{"Spells" if self.character_class != "Wizard" else "Spellbook"}: {nl.join([spell["name"] + ": " + spell["description"] for spell in self.spells])} \n'
         else:
@@ -794,7 +800,10 @@ class CharacterSheet:
             return 0
  
     def compute_wild_shape_num(self):
-        return 2
+        if self.character_class == 'Druid':
+            return 2
+        else:
+            return 0
  
     def compute_special_levels(self):
         if self.character_class in ['Fighter']:

@@ -1,9 +1,10 @@
 from package.GPTModel import GPTModel
 from package.SummarizedConversation import SummarizedConversation
 import eel
+import os
 
-eel.init("web")  
-
+eel.init(f'{os.path.dirname(os.path.realpath(__file__))}/web')
+#eel.init('C:/Users/rober/soure/dungeonGPT/python/web')
 model = GPTModel()
 conversation = SummarizedConversation(model=model)
 
@@ -13,6 +14,7 @@ model_bob = GPTModel(system_prompt="Please take the role of Alice. Please contin
 @eel.expose
 def add_message(role, content):
     conversation.add_message(role, content)
+
 @eel.expose
 def bob_reply(message):
     conversation.add_message("Alice", message)
@@ -36,4 +38,10 @@ def get_ancient():
 def get_recent():
     return conversation.recent
 
+@eel.expose
+def test_function():
+    print("hello")
+    eel.sayHello()
+
 eel.start("index.html")
+
