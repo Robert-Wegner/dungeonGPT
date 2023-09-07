@@ -40,8 +40,10 @@ def get_recent():
 
 @eel.expose
 def test_function():
+    
     print("hello")
-    eel.sayHello()
+    #eel.cringe()
+    eel.Conversation_addMessage("main_conversation", "user", "hello!");
 
 eel.start("index.html")
 
