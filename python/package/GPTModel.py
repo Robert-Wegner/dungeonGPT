@@ -1,7 +1,9 @@
-import os
 import openai
 import time
 import os
+import eel
+
+
 try:
     from files import read_file
 except:
@@ -28,10 +30,10 @@ DICE_ROLL_PROMPT = read_file("prompts/dice_roll_prompt.txt")
 
 class GPTModel:
   
-    def __init__(self, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT+DICE_ROLL_PROMPT, temperature=0.5):
+    def __init__(self, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT, temperature=0.5, max_characters=40000):
         self.model = model
         self.conversation = [{"role": "system", "content": ""}]
-        self.max_characters = 40000
+        self.max_characters = max_characters
         self.set_system_prompt(system_prompt)
         self.settings = {}
         self.api_url = "https://api.openai.com/v1/chat/completions"
@@ -133,7 +135,10 @@ class GPTModel:
 
         self.prune()
         return reply
-    
+
+    def delete_first_message(self):
+        del self.conversation[1]
+   
     def delete_last_message(self):
         self.conversation = self.conversation[:-1]
 
@@ -145,11 +150,62 @@ class GPTModel:
     
     def prune(self):
         while self.character_count() > self.max_characters:
-            del self.conversation[1]
-            del self.conversation[1]
+            print("pruning")
+            self.delete_first_message()
 
     def dump(self):
         return str(self.conversation)
     
     def pretty_dump(self):
         return '\n\n'.join([f'{message["role"]}: {message["content"]}' for message in self.conversation])
+
+
+class DisplayedGPTModel(GPTModel):
+
+    def __init__(self, grid_id, conversation_id, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT, temperature=0.5, max_characters=40000):
+
+        self.grid_id = grid_id
+        self.conversation_id = conversation_id
+
+        eel.Grid_createAndAddConversation(self.grid_id, self.conversation_id)
+        eel.Conversation_addRole(self.conversation_id, 'User', '#AA4010')
+        eel.Conversation_addRole(self.conversation_id, 'Assistant', '#4A0072')
+        eel.Conversation_addRole(self.conversation_id, 'System', '#1E70BB')
+        eel.Conversation_addMessage(self.conversation_id, 'System', '')
+
+        super().__init__(model, system_prompt, temperature, max_characters)
+    
+
+
+    def set_system_prompt(self, new):
+        super().set_system_prompt(new)
+        eel.Conversation_modifyMessage(self.conversation_id, 0, 'System', new)
+
+    def reply_as_user(self, reply):
+        response = super().reply_as_user(reply)
+        eel.Conversation_addMessage(self.conversation_id, 'User', reply)
+        return response
+    
+    def reply_as_user(self, reply):
+        response = super().force_reply_as_user(reply)
+        eel.Conversation_addMessage(self.conversation_id, 'User', reply)
+        return response
+
+    def reply_as_assistant(self, reply):
+        response = super().reply_as_assistant(reply)
+        eel.Conversation_addMessage(self.conversation_id, 'Assistant', reply)
+        return response
+    
+    def force_reply_as_assistant(self, reply):
+        response = super().force_reply_as_assistant(reply)
+        eel.Conversation_addMessage(self.conversation_id, 'Assistant', reply)
+        return response
+    
+    def delete_first_message(self):
+        super().delete_first_message()
+        eel.Conversation_removeMessages(self.conversation_id, 1, 2)
+
+    def reset(self):
+        super().reset()
+        eel.Conversation_removeMessages(self.conversation_id, 1, len(self.conversation) - 1)
+

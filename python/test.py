@@ -1,4 +1,4 @@
-from package.GPTModel import GPTModel
+from package.GPTModel import GPTModel, DisplayedGPTModel
 from package.SummarizedConversation import SummarizedConversation
 import eel
 import os
@@ -42,8 +42,14 @@ def get_recent():
 def test_function():
     
     print("hello")
-    #eel.cringe()
-    eel.Conversation_addMessage("main_conversation", "user", "hello!");
+    model = DisplayedGPTModel('main_grid', 'gpt_conversation')
+    model2 = DisplayedGPTModel('main_grid', 'gpt_conversation2')
+    reply = "Let's talk about a random subject!"
+    while True:
+        reply = model.generate_assistant_reply(message=reply)
+        reply = model2.generate_assistant_reply(message=reply)
+
+        #eel.Conversation_addMessage("main_conversation", input("Role: "), input("Content: "));
 
 eel.start("index.html")
 

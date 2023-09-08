@@ -22,6 +22,14 @@ export class Grid {
         }
     }
 
+    static _createAndAddConversation(grid_id, conversation_id) {
+        console.log("Grid_createAndAddConversation", grid_id, conversation_id, Grid._grids[grid_id]);
+        Grid._addItem(grid_id, conversation_id, (new Conversation(conversation_id)).container);
+    }
+
+    static _createAndAddTextbox(grid_id, textbox_id) {
+        Grid._addItem(grid_id, textbox_id, (new Textbox(textbox_id)).container);
+    }
 
     constructor(id, width, height) {
 
@@ -40,7 +48,7 @@ export class Grid {
             "justifyContent": "space-evenly",
             "alignItems": "stretch",
             "flexWrap": "wrap",
-            "backgroundColor": "#333333",
+            "backgroundColor": "#222222",
             "border": "2px solid red"
         });
 
@@ -48,6 +56,7 @@ export class Grid {
     }
 
     addItem(id, item) {
+        console.log("Adding tp grid: ", id, item);
         if (!(id in this.items)) {
             this.items[id] = item;
             this.container.appendChild(WrappedItem(item, id));
@@ -72,10 +81,13 @@ function WrappedItem(item, id) {
     item.id = id;
     let wrapper = document.createElement("div");
     let header = document.createElement("div");
+    Object.assign(header.style, {
+        padding: "2px 2px 2px 8px"
+    })
     header.innerHTML = id;
     Object.assign(wrapper.style, {
-        "max-height": "40vh",
-        "backgroundColor": "#555555"
+        "maxHeight": "40vh",
+        "backgroundColor": "#333333"
     });
     wrapper.appendChild(header);
     wrapper.appendChild(item);
