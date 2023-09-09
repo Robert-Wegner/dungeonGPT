@@ -1,6 +1,6 @@
 
 import { Conversation } from './Conversation.js'
-
+import { Textbox } from './Textbox.js'
 
 export class Grid {
 
@@ -23,11 +23,11 @@ export class Grid {
     }
 
     static _createAndAddConversation(grid_id, conversation_id) {
-        console.log("Grid_createAndAddConversation", grid_id, conversation_id, Grid._grids[grid_id]);
         Grid._addItem(grid_id, conversation_id, (new Conversation(conversation_id)).container);
     }
 
     static _createAndAddTextbox(grid_id, textbox_id) {
+        console.log("creating textbox")
         Grid._addItem(grid_id, textbox_id, (new Textbox(textbox_id)).container);
     }
 
@@ -39,14 +39,14 @@ export class Grid {
         this.container = document.createElement("div");
 
         this.items = {};
-        this.itemWrappers
+        
         Object.assign(this.container.style, {
             "width": this.width,
-            "height": this.height,
             "display": "flex",
             "flexDirextion": "column",
-            "justifyContent": "space-evenly",
-            "alignItems": "stretch",
+            "justifyContent": "flex-start",
+            "alignItems": "flex-start",
+            "alignConent": "flex-start",
             "flexWrap": "wrap",
             "backgroundColor": "#222222",
             "border": "2px solid red"
@@ -56,11 +56,9 @@ export class Grid {
     }
 
     addItem(id, item) {
-        console.log("Adding tp grid: ", id, item);
         if (!(id in this.items)) {
             this.items[id] = item;
             this.container.appendChild(WrappedItem(item, id));
-            console.log("Successfully add item to grid", item, id)
         }
         else {
             console.log("ID already exists");
@@ -86,8 +84,8 @@ function WrappedItem(item, id) {
     })
     header.innerHTML = id;
     Object.assign(wrapper.style, {
-        "maxHeight": "40vh",
-        "backgroundColor": "#333333"
+        "backgroundColor": "#333333",
+        "margin": "10px 0px 0px 10px"
     });
     wrapper.appendChild(header);
     wrapper.appendChild(item);

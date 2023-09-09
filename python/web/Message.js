@@ -1,7 +1,6 @@
 
 export function Message(role, content, backgroundColor) {
     var msg = document.createElement("div")
-    console.log("A", backgroundColor)
     Object.assign(msg.style, {
             "width": "95%",
             "backgroundColor": backgroundColor,

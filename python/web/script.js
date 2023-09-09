@@ -37,7 +37,6 @@ window.onload = function() {
 
     eel.expose(grid.makeJoke, "cringe");
 
-    console.log("Grids: ", Grid._grids);
     eel.expose(Grid._addItem, "Grid_addItem");
     eel.expose(Grid._createAndAddConversation, "Grid_createAndAddConversation");
     eel.expose(Grid._createAndAddTextbox, "Grid_createAndAddTextbox");

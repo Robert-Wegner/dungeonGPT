@@ -21,6 +21,8 @@ export class Conversation {
     }
 
     static _removeMessages(id, index, count) {
+        console.log("removing messages", id, index, count);
+        console.log(Conversation._conversations[id])
         Conversation._conversations[id].removeMessages(index, count);
     }
 
@@ -38,18 +40,10 @@ export class Conversation {
         this.hasInput = false;
 
         this.container = document.createElement('div');
-        
 
         Object.assign(this.container.style, {
             "border": "1px solid white",
-            "width": "20vw"
-        });
-
-        this.input = document.createElement("textarea");
-        this.input.rows = 6;
-        Object.assign(this.container.style, {
-            "border": "1px solid white",
-            "height": "95%",
+            "height": "45vw",
             "width": "25vw",
             "padding": "2px",
             "color": "#f0f0f0",
@@ -62,6 +56,21 @@ export class Conversation {
             "flexDirection": "column",
             "alignItems": "flex-start"
         });
+
+
+        this.scrollState = "jump"
+
+        this.container.addEventListener('scroll', (e) => {
+            const scrollableHeight = this.container.scrollHeight - this.container.clientHeight
+            if (this.container.scrollTop >= 0.9 * scrollableHeight) {
+                console.log("State is jump")
+                this.scrollState = "jump"
+            }
+            else if (this.container.scrollTop <= 0) {
+                console.log("State is stay")
+                this.scrollState = "stay"
+            }
+        })
 
         this.messages = [];
         this.roles = [];
@@ -83,31 +92,35 @@ export class Conversation {
     }
 
     addMessage(role, content) {
-        console.log("Adding message");
+        content = content.replace(/\n/g, "<br />");
+        console.log("adding message", role, content)
         this.messages.push({"role": role, "content": content})
         if (!this.roles.includes(role)) {
-            console.log("Role", role, "was not in", this.roles)
             this.addRole(role, chooseRandomColor())
         }
         this.container.appendChild(new Message(role, content, this.role_colors[role]))
-        this.container.scrollTop = this.container.scrollHeight;
+        if (this.scrollState == "jump") {
+            this.container.scrollTop = this.container.scrollHeight;
+        }
         
     }
 
     removeMessages(index, count) {
         this.messages.splice(index, count);
-        var remove_children = this.container.children.slice(index, index + count);
-        remove_children.forEach((child) => child.parent.removeChild(child));
+        var remove_children = Array.from(this.container.children).slice(index, index + count);
+        remove_children.forEach((child) => child.parentElement.removeChild(child));
     }
 
     modifyMessage(index, role, content) {
-        console.log("modifyinf message", 0, role, content)
+        content = content.replace(/\n/g, "<br />");
+
         this.messages[index]["role"] = role;
         this.messages[index]["content"] = content;
+
         if (!this.roles.includes(role)) {
             this.addRole(role, chooseRandomColor())
         }
-        this.container.replaceChild(new Message(role, content, this.role_colors[role], this.container.children[index]))
+        this.container.replaceChild(new Message(role, content, this.role_colors[role]), this.container.children[index])
     }
 
 
