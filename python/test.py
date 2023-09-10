@@ -9,8 +9,8 @@ eel.init(f'{os.path.dirname(os.path.realpath(__file__))}/web')
 def test_function():
     
 
-    model = DisplayedGPTModel('main_grid', 'gpt_conversation', model='gpt-3.5-turbo')
-    model2 = DisplayedGPTModel('main_grid', 'gpt_conversation2', model='gpt-3.5-turbo')
+    model = DisplayedGPTModel('main_grid', 'gpt_conversation', model='gpt-3.5-turbo', system_prompt='Please reply brifely')
+    model2 = DisplayedGPTModel('main_grid', 'gpt_conversation2', model='gpt-3.5-turbo', system_prompt='Please reply brifely')
     reply = "Let's talk about a random subject!"
 
     eel.Grid_createAndAddConversation('main_grid', 'debugbox')
@@ -36,6 +36,9 @@ def test_function():
 
         if action == "del last":
             model.delete_last_message()
+
+        if action == "reset":
+            model.reset()
 
 eel.start("index.html")
 

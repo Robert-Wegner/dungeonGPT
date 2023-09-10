@@ -263,6 +263,7 @@ class GPTModel:
     def reset(self):
         self.conversation = self.conversation[:1]
         self.update_conversation_tokens()
+        print(self.conversation)
 
     def character_count(self):
         return sum([len(c["content"]) for c in self.conversation])
@@ -273,7 +274,7 @@ class GPTModel:
             count += 1
             self.delete_first_message()
             self.update_conversation_tokens()
-        print("pruning", count)
+            print("pruning", count)
 
         
     def dump(self):
@@ -313,16 +314,19 @@ class DisplayedGPTModel(GPTModel):
         eel.Conversation_addMessage(self.conversation_id, role.capitalize(), content)
     
     def delete_first_message(self):
+        display_conversation_length = len(self.conversation) + 1
         super().delete_first_message()
         eel.Conversation_removeMessages(self.conversation_id, 2, 1)
 
     def delete_last_message(self):
+        display_conversation_length = len(self.conversation) + 1
         super().delete_last_message()
-        eel.Conversation_removeMessages(self.conversation_id, len(self.conversation), 1)
+        eel.Conversation_removeMessages(self.conversation_id, display_conversation_length - 1, 1)
 
     def reset(self):
+        display_conversation_length = len(self.conversation) + 1
         super().reset()
-        eel.Conversation_removeMessages(self.conversation_id, 2, len(self.conversation))
+        eel.Conversation_removeMessages(self.conversation_id, 2, display_conversation_length-2)
 
     def set_cost(self, amount):
         super().set_cost(amount)
