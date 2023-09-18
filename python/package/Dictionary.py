@@ -333,10 +333,10 @@ class Dictionary:
 
 dict = Dictionary()
 
-dict.load_from_text()
-dict.save_individual_to_pickle()
+#dict.load_from_text()
+#dict.save_individual_to_pickle()
 
-#dict.load_everything_embedded_from_pickle()
+dict.load_everything_embedded_from_pickle()
 
 print(dict.df_everything)
 while True:
