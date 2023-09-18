@@ -922,3 +922,10 @@ class CharacterSheet:
  
 
 #print(char.print())
+
+
+class DisplayedCharacterSheet(CharacterSheet):
+
+    def __init__(self):
+        super()
+        
