@@ -32,7 +32,7 @@ class GPTModel:
   
     _models = {
         "gpt-3.5-turbo": {
-            "context_window": 4097,
+            "context_window": 300,#4097,
             "prompt_token_price": 0.0000015,
             "completion_token_price": 0.000002
         },
@@ -124,11 +124,7 @@ class GPTModel:
         self.cautious_context_window_factor = 0.6
         self.conversation_tokens = 0
 
-        self.set_context_window({
-            "gpt-3.5-turbo": 4097,
-            "gpt-3.5-turbo-16k": 16385,
-            "gpt-4": 8192
-        }[model])
+        self.set_context_window(GPTModel._models[self.model]["context_window"])
 
         self.set_system_prompt(system_prompt)
 
@@ -287,7 +283,7 @@ class GPTModel:
 
 class DisplayedGPTModel(GPTModel):
 
-    def __init__(self, grid_id, conversation_id, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT, temperature=0.5, max_characters=40000):
+    def __init__(self, grid_id, conversation_id, model="gpt-3.5-turbo", system_prompt=DEFAULT_SYSTEM_PROMPT, temperature=0.7, max_characters=40000):
 
         self.grid_id = grid_id
         self.conversation_id = conversation_id
