@@ -31,14 +31,16 @@ def test_function():
 
         action = input("--> ")
 
-        if action == "del first":
-            model.delete_first_message()
+        #if action == "del first":
+            #model.delete_first_message()
 
-        if action == "del last":
-            model.delete_last_message()
+        #if action == "del last":
+            #model.delete_last_message()
 
-        if action == "reset":
-            model.reset()
+        #if action == "reset":
+            #model.reset()
 
 eel.start("index.html")
+
+
 

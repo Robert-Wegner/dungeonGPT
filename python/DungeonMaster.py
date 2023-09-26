@@ -1,6 +1,9 @@
 #from prompts import PROMPTS
-from package import GPTModel, SummarizedConversation, CharacterSheet
+from package import GPTModel, SummarizedConversation, CharacterSheet, CharacterSheetManager
+
 import json
+import eel
+import os
 
 PROMPTS = {
     'combat_system': '',
@@ -15,19 +18,19 @@ PROMPTS = {
 class DungeonMaster:
 
     def __init__(self):
-        self.model_summarize = GPTModel.GPTModel()
+        self.model_summarize = GPTModel.DisplayedGPTModel('main_grid', 'model_summarize')
         self.conversation = SummarizedConversation.SummarizedConversation(self.model_summarize,
                                                                           recent_max_chars = 500, 
                                                                           current_max_chars = 500,
                                                                           ancient_max_chars = 4000,
                                                                           max_chars = 4000)
         self.terminate = False
-        self.model_dm = GPTModel.GPTModel(system_prompt=PROMPTS['dm_base'])
+        self.model_dm = GPTModel.DisplayedGPTModel('main_grid', 'model_dm', system_prompt=PROMPTS['dm_base'])
         self.encyclopedia = {}
-        self.model_encyclopedia = GPTModel.GPTModel()
-        self.model_controller = GPTModel.GPTModel()
+        self.model_encyclopedia = GPTModel.DisplayedGPTModel('main_grid', 'model_encyclopedia')
+        self.model_dice_roller = GPTModel.DisplayedGPTModel('main_grid', 'model_dice_roller')
 
-        self.char = None
+        self.char_manager = CharacterSheetManager.CharacterSheetManager()
         self.experts = [
             {
                 'name': 'combat',
@@ -50,6 +53,9 @@ class DungeonMaster:
         ]
         self.max_drafts = 6
 
+        eel.init(f'{os.path.dirname(os.path.realpath(__file__))}/web')
+
+
     def user_reply(self, message):
         self.conversation.add_message("User", message)
 
@@ -60,6 +66,7 @@ class DungeonMaster:
         self.conversation.add_message("Console", message)
 
     def initialize(self):
+         
 
         for expert in self.experts:
             #expert.model = GPTModel(model=expert.version, system_prompt=expert.systemPrompt)
@@ -72,107 +79,14 @@ class DungeonMaster:
             This means that your task is to call functions that update the state of the system 
             depending on the conversation between the dungeon master and the user.
         ''')
-
-        self.available_functions_json = [
-            {
-                "name": "finish",
-                "description": "Call this function to finish your operations when all the necessary changes have been implemented.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {}
-                },
-                "required": []
-            },
-            {
-                "name": "level_up",
-                "description": "The character gains 1 level.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {}
-                },
-                "required": []
-            },
-            {
-                "name": "set_ability_score",
-                "description": "The name of the ability is one of 'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'. The value is an integer.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "The ability score which is to be cset to a new value"
-                        },
-                        "value": {
-                            "type": "number",
-                            "description": "The new value"
-                        }
-                    }
-                },
-                "required": []
-            },
-            {
-                "name": "create_character",
-                "description": "Creates a new main character. Overwrites the old one!",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "Name"
-                        },
-                        "character_class": {
-                            "type": "string",
-                            "description": "Class"
-                        },
-                        "race": {
-                            "type": "string",
-                            "description": "Race"
-                        },
-                        "first_skill_proficiency": {
-                            "type": "string",
-                            "description": "Initial skill proficiency"
-                        },
-                        "second_skill_proficiency": {
-                            "type": "string",
-                            "description": "Initial skill proficiency"
-                        },
-                        "STR": {
-                            "type": "number",
-                            "description": "Strength"
-                        },
-                        "DEX": {
-                            "type": "number",
-                            "description": "Dexterity"
-                        },
-                        "CON": {
-                            "type": "number",
-                            "description": "Constitution"
-                        },
-                        "INT": {
-                            "type": "number",
-                            "description": "Intelligence"
-                        },
-                        "WIS": {
-                            "type": "number",
-                            "description": "Wisdom"
-                        },
-                        "CHA": {
-                            "type": "number",
-                            "description": "Charisma"
-                        }
-                    },
-                },
-                "required": []
-            },
-        ]
-
-        self.available_functions = {
-            "create_character": self.create_new_character
-        } 
-
+        
 
     def get_context(self):
-        context = "Here is a summary of the whole adventure so far: \n"
+
+        context = "\n Character sheet: \n"
+        context += self.char_manager.character.print() + "\n"
+    
+        context += "Here is a summary of the whole adventure so far: \n"
         context += self.conversation.ancient + "\n"
         context += "Here is a summary of only more recent events: \n"
         context += self.conversation.recent + "\n"
@@ -181,10 +95,60 @@ class DungeonMaster:
         context += "Finally, here are the most recent exchanges between the DM and the user: \n"
         context += self.conversation.dump(-4)
 
-        context += "\n Character sheet: \n"
-        context += self.char.print()
-
         return context
+    
+    def play(self, message):
+        self.user_reply(message)
+
+        self.model_dm.reset()
+        self.model_dm.functions = [
+            {
+                "name": "create_draft",
+                "description": "Creates a draft of the DM reply. Feedback by the expert models will be returned.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "draft": {
+                            "type": "string",
+                            "description": "A draft of the reply the DM will give the user."
+                        }
+                    }
+                },
+                "required": []
+            },
+            {
+                "name": "submit_draft",
+                "description": "If the draft is good this function submits it, meaning it will be shown to the user.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "draft": {
+                            "type": "string",
+                            "description": "A draft of the reply the DM will give the user."
+                        }
+                    }
+                },
+                "required": []
+            }
+        ]
+        
+        context = self.get_context()
+
+        initial_prompt = context + PROMPTS['dm_initial'] + self.get_experts_initial(context)
+        draft = self.model_dm.generate_assistant_reply(initial_prompt)
+
+        draft_num = 1
+        finished = False
+        while draft_num < self.max_drafts and not finished:
+            criticism = self.get_experts_criticism(context, draft)
+
+            controller_decision = self.model_controller.generate_assistant_reply(draft, criticism)
+            
+            self.model_dm.generate_assistant_reply(criticism)
+
+            draft_num += 1
+
+
     
     def create_new_character(self, name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA):
         self.char = CharacterSheet.CharacterSheet(name, race, character_class, first_skill_proficiency, second_skill_proficiency, STR, DEX, CON, INT, WIS, CHA)
@@ -264,26 +228,6 @@ class DungeonMaster:
     def get_experts_criticism(context, draft):
         return "No feedback needed."
     
-    def play(self, message):
-        self.user_reply(message)
-
-        self.model_dm.reset()
-        context = self.get_context()
-
-        initial_prompt = context + PROMPTS['dm_initial'] + self.get_experts_initial(context)
-        draft = self.model_dm.generate_assistant_reply(initial_prompt)
-
-        draft_num = 1
-        finished = False
-        while draft_num < self.max_drafts and not finished:
-            criticism = self.get_experts_criticism(context, draft)
-
-            controller_decision = self.model_controller.generate_assistant_reply(draft, criticism)
-            
-            self.model_dm.generate_assistant_reply(criticism)
-
-            draft_num += 1
-
 
 dm = DungeonMaster()
 dm.initialize()

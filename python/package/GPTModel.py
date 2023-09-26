@@ -55,6 +55,7 @@ class GPTModel:
 
     @staticmethod
     def num_tokens_from_messages(messages, model="gpt-3.5-turbo"):         #openai-cookbook/examples/How_to_count_tokens_with_tiktoken.ipynb
+        return 0
         """Return the number of tokens used by a list of messages."""
         try:
             encoding = tiktoken.encoding_for_model(model)
@@ -96,6 +97,7 @@ class GPTModel:
     
     @staticmethod
     def num_tokens_from_functions(functions, model="gpt-3.5-turbo"):            #THIS IS ONLY AN APPROXIMATION
+        return 0
         functions_string = str(functions)
         return GPTModel.num_tokens_from_messages({"system", functions_string})
 
